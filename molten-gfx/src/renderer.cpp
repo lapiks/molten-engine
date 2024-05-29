@@ -43,7 +43,7 @@ namespace gfx {
   }
 
   Pipeline Renderer::new_pipeline(const PipelineDesc& desc) {
-    ctx.new_pipeline(_pipeline_id);
+    ctx.new_pipeline(_pipeline_id, desc);
     return _pipeline_id++;
   }
 }

@@ -12,19 +12,28 @@ namespace gfx {
   constexpr uint32_t MAX_PIPELINES = 4096;
 
   struct GLBuffer {
-    GLuint id = 0;
+    GLuint id;
   };
 
   struct GLTexture {
-    GLuint id = 0;
+    GLuint id;
   };
 
   struct GLShader {
-    GLuint id = 0;
+    GLuint id;
+  };
+
+  struct GLVertexAttribute {
+    uint32_t index;
+    int32_t size;
+    GLenum type;
+    int32_t stride;
   };
 
   struct GLPipeline {
     PipelineCommon pipeline_common;
+    GLShader shader;
+    GLVertexAttribute attributes[MAX_ATTRIBUTES];
   };
 
   class GLRenderer {
@@ -38,7 +47,7 @@ namespace gfx {
     bool new_texture(Texture h, const TextureDesc& desc);
     bool new_shader(Shader h, const ShaderDesc& desc);
     bool new_pass(Pass h);
-    bool new_pipeline(Pipeline h);
+    bool new_pipeline(Pipeline h, const PipelineDesc& desc);
 
   private:
     std::array<GLBuffer, MAX_BUFFERS> _buffers;
@@ -47,8 +56,9 @@ namespace gfx {
     std::array<GLPipeline, MAX_PIPELINES> _pipelines;
 
     struct GLState {
-      GLPipeline pipeline;
-      GLBuffer vertex_buffer;
+      GLPipeline* pipeline;
+      GLBuffer* vertex_buffer;
+      GLuint global_vao;
     };
 
     GLState _state;

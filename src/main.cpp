@@ -66,9 +66,13 @@ int main(int, char**) {
     }
   );
 
+  gfx::VertexLayout layout;
+  layout.attributes[0].format = gfx::AttributeFormat::FLOAT3;
+
   gfx::Pipeline pipe = renderer.new_pipeline(
     gfx::PipelineDesc{
-      shader
+      shader,
+      layout,
     }
   );
 

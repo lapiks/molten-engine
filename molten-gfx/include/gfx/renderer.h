@@ -4,6 +4,7 @@
 
 namespace gfx {
   constexpr size_t MAX_VERTEX_BUFFERS = 8;
+  constexpr size_t MAX_ATTRIBUTES = 16;
 
   using Buffer = uint32_t;
   using Texture = uint32_t;
@@ -33,6 +34,11 @@ namespace gfx {
     TRIANGLE_STRIP,
   };
 
+  enum class AttributeFormat {
+    FLOAT2,
+    FLOAT3,
+  };
+
   struct Memory {
     void* data = nullptr;
     size_t size = 0;
@@ -56,17 +62,28 @@ namespace gfx {
     uint32_t height = 0;
   };
 
-  struct PipelineCommon {
-    PrimitiveType primitive_type = PrimitiveType::TRIANGLES;
-  };
-
   struct ShaderDesc {
     const char* vertex_src = nullptr;
     const char* fragment_src = nullptr;
   };
 
+  struct VertexAttribute {
+    int32_t index = 0;
+    size_t stride = 0;
+    AttributeFormat format = AttributeFormat::FLOAT3;
+  };
+
+  struct VertexLayout {
+    VertexAttribute attributes[MAX_ATTRIBUTES];
+  };
+
   struct PipelineDesc {
     Shader shader;
+    VertexLayout layout;
+  };
+
+  struct PipelineCommon {
+    PrimitiveType primitive_type = PrimitiveType::TRIANGLES;
   };
 
   class Renderer {

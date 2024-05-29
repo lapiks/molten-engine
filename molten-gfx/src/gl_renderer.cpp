@@ -10,22 +10,34 @@ namespace gfx {
       std::cout << "Failed to initialize GLAD" << std::endl;
       return;
     }
+
+    glGenVertexArrays(1, &_state.global_vao);
+    glBindVertexArray(_state.global_vao);
   }
 
   void GLRenderer::apply_pipeline(Pipeline pipe) {
-    _state.pipeline = _pipelines[pipe];
+    _state.pipeline = &_pipelines[pipe];
+
+    glUseProgram(_state.pipeline->shader.id);
   }
 
   void GLRenderer::apply_bindings(Bindings bind) {
-    // todo manage multiple VBO ?
-    _state.vertex_buffer = _buffers[bind.vertex_buffers[0]];
+    // todo manage multiple VBO?
+    _state.vertex_buffer = &_buffers[bind.vertex_buffers[0]];
+
+    glBindBuffer(GL_VERTEX_ARRAY, _state.vertex_buffer->id);
+    for (int i = 0; i < MAX_ATTRIBUTES; i++) {
+      const GLVertexAttribute& attr = _state.pipeline->attributes[i];
+      glVertexAttribPointer(i, attr.size, attr.type, GL_FALSE, attr.stride, (void*)0);
+      glEnableVertexAttribArray(i);
+    }
   }
 
   void GLRenderer::draw(uint32_t first_element, uint32_t num_elements) {
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLuint primitive = get_gl_primitive_type(_state.pipeline.pipeline_common.primitive_type);
+    GLuint primitive = get_gl_primitive_type(_state.pipeline->pipeline_common.primitive_type);
 
     glDrawArrays(primitive, first_element, num_elements);
   }
@@ -58,15 +70,12 @@ namespace gfx {
     glTexImage2D(target, 0, GL_RGB, desc.width, desc.height, 0, format, GL_UNSIGNED_BYTE, desc.mem.data);
     glGenerateMipmap(target);
 
-    return false;
+    return true;
   }
 
   bool GLRenderer::new_shader(Shader h, const ShaderDesc& desc) {
-    GLShader& shader = _shaders[h];
-    shader.id = glCreateShader(GL_VERTEX_SHADER);
-
-    GLuint vs = 0;
-    glShaderSource(vs, 1, (const GLchar* const*)desc.vertex_src, NULL);
+    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vs, 1, &desc.vertex_src, NULL);
     glCompileShader(vs);
 
     int  success;
@@ -78,8 +87,8 @@ namespace gfx {
       return false;
     }
 
-    GLuint fs = 0;
-    glShaderSource(fs, 1, (const GLchar* const*)desc.fragment_src, NULL);
+    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs, 1, &desc.fragment_src, NULL);
     glCompileShader(fs);
 
     glGetShaderiv(fs, GL_COMPILE_STATUS, &success);
@@ -89,6 +98,7 @@ namespace gfx {
       return false;
     }
 
+    GLShader& shader = _shaders[h];
     shader.id = glCreateProgram();
     glAttachShader(shader.id, vs);
     glAttachShader(shader.id, fs);
@@ -111,8 +121,19 @@ namespace gfx {
     return false;
   }
 
-  bool GLRenderer::new_pipeline(Pipeline h) {
-    return false;
+  bool GLRenderer::new_pipeline(Pipeline h, const PipelineDesc& desc) {
+    GLPipeline& pipe = _pipelines[h];
+    pipe.shader = _shaders[desc.shader];
+
+    for (int i = 0; i < MAX_ATTRIBUTES; i++) {
+      const VertexAttribute& attr = desc.layout.attributes[i];
+      GLVertexAttribute& gl_attr = pipe.attributes[i];
+      gl_attr.type = get_gl_attribute_type(attr.format);
+      gl_attr.size = get_gl_attribute_size(attr.format);
+      gl_attr.stride = get_gl_type_size(gl_attr.type * gl_attr.size);
+    }
+
+    return true;
   }
 }
 
