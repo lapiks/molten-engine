@@ -1,2 +1,2 @@
-# molten-engine
+# Molten Engine
 C++ game engine
