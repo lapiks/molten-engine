@@ -19,6 +19,18 @@ namespace gfx {
     TEXTURE_2D,
   };
 
+  enum class TextureFormat {
+    RGB,
+    RGBA,
+  };
+
+  enum class PrimitiveType {
+    LINES,
+    TRIANGLES,
+    TRIANGLE_FAN,
+    TRIANGLE_STRIP,
+  };
+
   struct Memory {
     void* data = nullptr;
     uint32_t size = 0;
@@ -31,8 +43,14 @@ namespace gfx {
   struct TextureDesc {
     Memory* mem = nullptr;
     TextureType type = TextureType::TEXTURE_2D;
+    TextureFormat format = TextureFormat::RGB;
+    uint32_t width = 0;
+    uint32_t height = 0;
   };
 
+  struct PipelineCommon {
+    PrimitiveType primitive_type = PrimitiveType::TRIANGLES;
+  };
 
   struct ShaderDesc {
     Memory* vertex_mem = nullptr;
@@ -42,7 +60,7 @@ namespace gfx {
   class Renderer {
   public:
     void init(void* glProcAdress);
-    void draw();
+    void draw(uint32_t first_element, uint32_t num_elements);
 
     BufferHandle new_buffer(const BufferDesc& desc);
     TextureHandle new_texture(const TextureDesc& desc);

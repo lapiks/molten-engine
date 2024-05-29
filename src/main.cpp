@@ -47,7 +47,7 @@ int main(int, char**) {
       }
     }
 
-    renderer.draw();
+    renderer.draw(0, 3);
 
     SDL_GL_SwapWindow(window);
   }
