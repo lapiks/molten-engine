@@ -5,9 +5,15 @@ project(
     LANGUAGES CXX C
 )
 
-add_executable(MoltenEngine main.cpp)
 add_subdirectory(third_party/SDL-release-2.30.3)
+add_subdirectory(molten-gfx)
+
+add_executable(MoltenEngine "src/main.cpp")
+
+include_directories(${CMAKE_SOURCE_DIR}/molten-gfx/include)
+
 target_link_libraries(MoltenEngine PRIVATE SDL2::SDL2)
+target_link_libraries(MoltenEngine PRIVATE MoltenGfx)
 
 set_target_properties(MoltenEngine PROPERTIES
     CXX_STANDARD 17
@@ -22,7 +28,7 @@ else()
 endif()
 
 if(XCODE)
-    set_target_properties(App PROPERTIES
+    set_target_properties(MoltenEngine PROPERTIES
         XCODE_GENERATE_SCHEME ON
         XCODE_SCHEME_ENABLE_GPU_FRAME_CAPTURE_MODE "Metal")
 endif()
