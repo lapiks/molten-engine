@@ -33,6 +33,48 @@ int main(int, char**) {
   gfx::Renderer renderer;
   renderer.init(SDL_GL_GetProcAddress);
 
+  const char* vs_src = "#version 330 core\n"
+    "layout (location = 0) in vec3 aPos;\n"
+    "void main()\n"
+    "{\n"
+    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "}\0";
+
+  const char* fs_src = "#version 330 core\n"
+    "out vec4 FragColor;\n"
+    "void main()\n"
+    "{\n"
+    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "}\n\0";
+  
+  gfx::Shader shader = renderer.new_shader(
+    gfx::ShaderDesc{
+      vs_src,
+      fs_src,
+    }
+  );
+
+  float vertices[] = {
+    -0.5f, -0.5f, 0.0f, // left  
+     0.5f, -0.5f, 0.0f, // right 
+     0.0f,  0.5f, 0.0f  // top   
+  };
+
+  gfx::Buffer buffer = renderer.new_buffer(
+    gfx::BufferDesc{
+      gfx::MAKE_MEMORY(vertices)
+    }
+  );
+
+  gfx::Pipeline pipe = renderer.new_pipeline(
+    gfx::PipelineDesc{
+      shader
+    }
+  );
+
+  gfx::Bindings bind;
+  bind.vertex_buffers[0] = buffer;
+
   bool shouldClose = false;
   while (!shouldClose) {
     SDL_Event event;
@@ -47,6 +89,8 @@ int main(int, char**) {
       }
     }
 
+    renderer.apply_pipeline(pipe);
+    renderer.apply_bindings(bind);
     renderer.draw(0, 3);
 
     SDL_GL_SwapWindow(window);

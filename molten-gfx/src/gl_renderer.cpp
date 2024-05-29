@@ -12,26 +12,34 @@ namespace gfx {
     }
   }
 
+  void GLRenderer::apply_pipeline(Pipeline pipe) {
+    _state.pipeline = _pipelines[pipe];
+  }
+
+  void GLRenderer::apply_bindings(Bindings bind) {
+    // todo manage multiple VBO ?
+    _state.vertex_buffer = _buffers[bind.vertex_buffers[0]];
+  }
+
   void GLRenderer::draw(uint32_t first_element, uint32_t num_elements) {
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLPipeline& pipe = _pipelines[_state.current_pipe];
-    GLuint primitive = get_gl_primitive_type(pipe.pipeline_common.primitive_type);
+    GLuint primitive = get_gl_primitive_type(_state.pipeline.pipeline_common.primitive_type);
 
     glDrawArrays(primitive, first_element, num_elements);
   }
 
-  bool GLRenderer::new_buffer(BufferHandle h, const BufferDesc& desc) {
+  bool GLRenderer::new_buffer(Buffer h, const BufferDesc& desc) {
     GLBuffer& buffer = _buffers[h];
     glGenBuffers(1, &buffer.id);
     glBindBuffer(GL_ARRAY_BUFFER, buffer.id);
-    glBufferData(GL_ARRAY_BUFFER, desc.mem->size, desc.mem->data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, desc.mem.size, desc.mem.data, GL_STATIC_DRAW);
 
     return true;
   }
 
-  bool GLRenderer::new_texture(TextureHandle h, const TextureDesc& desc) {
+  bool GLRenderer::new_texture(Texture h, const TextureDesc& desc) {
     GLTexture& texture = _textures[h];
     glGenTextures(1, &texture.id);
 
@@ -47,18 +55,18 @@ namespace gfx {
     glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // todo: config data type
-    glTexImage2D(target, 0, GL_RGB, desc.width, desc.height, 0, format, GL_UNSIGNED_BYTE, desc.mem->data);
+    glTexImage2D(target, 0, GL_RGB, desc.width, desc.height, 0, format, GL_UNSIGNED_BYTE, desc.mem.data);
     glGenerateMipmap(target);
 
     return false;
   }
 
-  bool GLRenderer::new_shader(ShaderHandle h, const ShaderDesc& desc) {
+  bool GLRenderer::new_shader(Shader h, const ShaderDesc& desc) {
     GLShader& shader = _shaders[h];
     shader.id = glCreateShader(GL_VERTEX_SHADER);
 
     GLuint vs = 0;
-    glShaderSource(vs, 1, (const GLchar* const*)desc.vertex_mem->data, NULL);
+    glShaderSource(vs, 1, (const GLchar* const*)desc.vertex_src, NULL);
     glCompileShader(vs);
 
     int  success;
@@ -71,7 +79,7 @@ namespace gfx {
     }
 
     GLuint fs = 0;
-    glShaderSource(fs, 1, (const GLchar* const*)desc.vertex_mem->data, NULL);
+    glShaderSource(fs, 1, (const GLchar* const*)desc.fragment_src, NULL);
     glCompileShader(fs);
 
     glGetShaderiv(fs, GL_COMPILE_STATUS, &success);
@@ -99,11 +107,11 @@ namespace gfx {
     return true;
   }
 
-  bool GLRenderer::new_pass(PassHandle h) {
+  bool GLRenderer::new_pass(Pass h) {
     return false;
   }
 
-  bool GLRenderer::new_pipeline(PipelineHandle h) {
+  bool GLRenderer::new_pipeline(Pipeline h) {
     return false;
   }
 }

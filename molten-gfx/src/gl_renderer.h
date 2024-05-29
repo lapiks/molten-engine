@@ -30,13 +30,15 @@ namespace gfx {
   class GLRenderer {
   public:
     void init(void* glProcAdress);
+    void apply_pipeline(Pipeline pipe);
+    void apply_bindings(Bindings bind);
     void draw(uint32_t first_element, uint32_t num_elements);
 
-    bool new_buffer(BufferHandle h, const BufferDesc& desc);
-    bool new_texture(TextureHandle h, const TextureDesc& desc);
-    bool new_shader(ShaderHandle h, const ShaderDesc& desc);
-    bool new_pass(PassHandle h);
-    bool new_pipeline(PipelineHandle h);
+    bool new_buffer(Buffer h, const BufferDesc& desc);
+    bool new_texture(Texture h, const TextureDesc& desc);
+    bool new_shader(Shader h, const ShaderDesc& desc);
+    bool new_pass(Pass h);
+    bool new_pipeline(Pipeline h);
 
   private:
     std::array<GLBuffer, MAX_BUFFERS> _buffers;
@@ -45,7 +47,8 @@ namespace gfx {
     std::array<GLPipeline, MAX_PIPELINES> _pipelines;
 
     struct GLState {
-      PipelineHandle current_pipe;
+      GLPipeline pipeline;
+      GLBuffer vertex_buffer;
     };
 
     GLState _state;
