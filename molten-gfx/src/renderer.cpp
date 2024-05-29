@@ -14,24 +14,19 @@ namespace gfx {
     ctx.draw();
   }
 
-  BufferHandle Renderer::new_buffer() {
-    ctx.new_buffer(_buffer_id);
+  BufferHandle Renderer::new_buffer(const BufferDesc& desc) {
+    ctx.new_buffer(_buffer_id, desc);
     return _buffer_id++;
   }
 
-  TextureHandle Renderer::new_texture() {
-    ctx.new_texture(_texture_id);
+  TextureHandle Renderer::new_texture(const TextureDesc& desc) {
+    ctx.new_texture(_texture_id, desc);
     return _texture_id++;
   }
    
-  ShaderHandle Renderer::new_shader() {
-    ctx.new_shader(_shader_id);
+  ShaderHandle Renderer::new_shader(const ShaderDesc& desc) {
+    ctx.new_shader(_shader_id, desc);
     return _shader_id++;
-  }
-
-  ProgramHandle Renderer::new_program() {
-    ctx.new_program(_program_id);
-    return _program_id++;
   }
 
   PassHandle Renderer::new_pass() {
