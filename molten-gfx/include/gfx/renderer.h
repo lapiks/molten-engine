@@ -39,6 +39,11 @@ namespace gfx {
     FLOAT3,
   };
 
+  enum class BufferType {
+    VERTEX_BUFFER,
+    INDEX_BUFFER,
+  };
+
   struct Memory {
     void* data = nullptr;
     size_t size = 0;
@@ -48,10 +53,12 @@ namespace gfx {
 
   struct BufferDesc {
     Memory mem;
+    BufferType type;
   };
 
   struct Bindings {
     Buffer vertex_buffers[MAX_VERTEX_BUFFERS];
+    Buffer index_buffer;
   };
 
   struct TextureDesc {

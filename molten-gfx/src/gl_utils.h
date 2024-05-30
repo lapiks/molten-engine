@@ -51,5 +51,13 @@ namespace gfx {
     }
     return 0;
   }
+
+  GLenum get_gl_buffer_type(BufferType type) {
+    switch (type) {
+      case BufferType::VERTEX_BUFFER: return GL_ARRAY_BUFFER;
+      case BufferType::INDEX_BUFFER: return GL_ELEMENT_ARRAY_BUFFER;
+    }
+    return GL_NONE;
+  }
 }
 

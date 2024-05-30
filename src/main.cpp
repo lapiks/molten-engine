@@ -6,8 +6,6 @@
 #include <gfx/renderer.h>
 
 int main(int, char**) {
-  std::cout << "Hello, world!" << std::endl;
-
   SDL_SetMainReady();
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "Failed to initialize SDL. Error: " << SDL_GetError() << std::endl;
@@ -55,14 +53,26 @@ int main(int, char**) {
   );
 
   float vertices[] = {
-    -0.5f, -0.5f, 0.0f, // left  
-     0.5f, -0.5f, 0.0f, // right 
-     0.0f,  0.5f, 0.0f  // top   
+  -0.5f, -0.5f, 0.0f, // left  
+   0.5f, -0.5f, 0.0f, // right 
+   0.0f,  0.5f, 0.0f  // top   
   };
 
-  gfx::Buffer buffer = renderer.new_buffer(
+  gfx::Buffer vbuffer = renderer.new_buffer(
     gfx::BufferDesc{
-      gfx::MAKE_MEMORY(vertices)
+      gfx::MAKE_MEMORY(vertices),
+      gfx::BufferType::VERTEX_BUFFER,
+    }
+  );
+
+  uint16_t indices[] = {
+    1, 2, 3
+  };
+
+  gfx::Buffer ibuffer = renderer.new_buffer(
+    gfx::BufferDesc{
+      gfx::MAKE_MEMORY(indices),
+      gfx::BufferType::INDEX_BUFFER,
     }
   );
 
@@ -77,7 +87,8 @@ int main(int, char**) {
   );
 
   gfx::Bindings bind;
-  bind.vertex_buffers[0] = buffer;
+  bind.vertex_buffers[0] = vbuffer;
+  bind.index_buffer = ibuffer;
 
   bool shouldClose = false;
   while (!shouldClose) {

@@ -37,7 +37,7 @@ namespace gfx {
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    GLuint primitive = get_gl_primitive_type(_state.pipeline->pipeline_common.primitive_type);
+    GLenum primitive = get_gl_primitive_type(_state.pipeline->pipeline_common.primitive_type);
 
     glDrawArrays(primitive, first_element, num_elements);
   }
@@ -45,8 +45,11 @@ namespace gfx {
   bool GLRenderer::new_buffer(Buffer h, const BufferDesc& desc) {
     GLBuffer& buffer = _buffers[h];
     glGenBuffers(1, &buffer.id);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer.id);
-    glBufferData(GL_ARRAY_BUFFER, desc.mem.size, desc.mem.data, GL_STATIC_DRAW);
+
+    GLenum gl_buffer_type = get_gl_buffer_type(desc.type);
+
+    glBindBuffer(gl_buffer_type, buffer.id);
+    glBufferData(gl_buffer_type, desc.mem.size, desc.mem.data, GL_STATIC_DRAW);
 
     return true;
   }
@@ -55,8 +58,8 @@ namespace gfx {
     GLTexture& texture = _textures[h];
     glGenTextures(1, &texture.id);
 
-    GLuint target = get_gl_texture_target(desc.type);
-    GLuint format = get_gl_texture_format(desc.format);
+    GLenum target = get_gl_texture_target(desc.type);
+    GLenum format = get_gl_texture_format(desc.format);
 
     glBindTexture(target, texture.id);
 
