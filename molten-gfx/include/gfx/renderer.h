@@ -44,6 +44,12 @@ namespace gfx {
     INDEX_BUFFER,
   };
 
+  enum class IndexType {
+    NONE,
+    UINT16,
+    UINT32,
+  };
+
   struct Memory {
     void* data = nullptr;
     size_t size = 0;
@@ -87,6 +93,7 @@ namespace gfx {
   struct PipelineDesc {
     Shader shader;
     VertexLayout layout;
+    IndexType index_type;
   };
 
   struct PipelineCommon {
@@ -98,7 +105,7 @@ namespace gfx {
     void init(void* glProcAdress);
     void apply_pipeline(Pipeline pipe);
     void apply_bindings(Bindings bind);
-    void draw(uint32_t first_element, uint32_t num_elements);
+    void draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances);
 
     Buffer new_buffer(const BufferDesc& desc);
     Texture new_texture(const TextureDesc& desc);

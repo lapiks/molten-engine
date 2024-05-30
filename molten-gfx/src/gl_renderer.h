@@ -41,7 +41,7 @@ namespace gfx {
     void init(void* glProcAdress);
     void apply_pipeline(Pipeline pipe);
     void apply_bindings(Bindings bind);
-    void draw(uint32_t first_element, uint32_t num_elements);
+    void draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances);
 
     bool new_buffer(Buffer h, const BufferDesc& desc);
     bool new_texture(Texture h, const TextureDesc& desc);

@@ -10,8 +10,8 @@ namespace gfx {
     ctx.init(glProcAdress);
   }
 
-  void Renderer::draw(uint32_t first_element, uint32_t num_elements) {
-    ctx.draw(first_element, num_elements);
+  void Renderer::draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances) {
+    ctx.draw(first_element, num_elements, num_instances);
   }
 
   void Renderer::apply_pipeline(Pipeline pipe) {

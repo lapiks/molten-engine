@@ -83,6 +83,7 @@ int main(int, char**) {
     gfx::PipelineDesc{
       shader,
       layout,
+      gfx::IndexType::UINT16,
     }
   );
 
@@ -106,7 +107,7 @@ int main(int, char**) {
 
     renderer.apply_pipeline(pipe);
     renderer.apply_bindings(bind);
-    renderer.draw(0, 3);
+    renderer.draw(0, 3, 1);
 
     SDL_GL_SwapWindow(window);
   }

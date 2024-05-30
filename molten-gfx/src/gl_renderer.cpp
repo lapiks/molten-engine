@@ -33,12 +33,13 @@ namespace gfx {
     }
   }
 
-  void GLRenderer::draw(uint32_t first_element, uint32_t num_elements) {
+  void GLRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances) {
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     GLenum primitive = get_gl_primitive_type(_state.pipeline->pipeline_common.primitive_type);
 
+    if (num_instances > 0)
     glDrawArrays(primitive, first_element, num_elements);
   }
 
