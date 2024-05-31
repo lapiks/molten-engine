@@ -16,7 +16,7 @@ target_link_libraries(MoltenEngine PRIVATE SDL2::SDL2)
 target_link_libraries(MoltenEngine PRIVATE MoltenGfx)
 
 set_target_properties(MoltenEngine PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 20
     CXX_EXTENSIONS OFF
     COMPILE_WARNING_AS_ERROR ON
 )

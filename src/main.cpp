@@ -108,8 +108,7 @@ int main(int, char**) {
     renderer.begin_default_pass(
       gfx::PassAction{
         gfx::ColorAction {
-          gfx::Action::CLEAR,
-          gfx::Color(0.5, 0.0, 0.0, 0.0)
+          .color = gfx::Color(0.5, 0.0, 0.0, 0.0)
         }
       }
     );
