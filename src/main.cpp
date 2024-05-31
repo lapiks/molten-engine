@@ -105,6 +105,14 @@ int main(int, char**) {
       }
     }
 
+    renderer.begin_default_pass(
+      gfx::PassAction{
+        gfx::ColorAction {
+          gfx::Action::CLEAR,
+          gfx::Color(0.5, 0.0, 0.0, 0.0)
+        }
+      }
+    );
     renderer.apply_pipeline(pipe);
     renderer.apply_bindings(bind);
     renderer.draw(0, 3, 1);

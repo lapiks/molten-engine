@@ -5,6 +5,7 @@
 namespace gfx {
   constexpr size_t MAX_VERTEX_BUFFERS = 8;
   constexpr size_t MAX_ATTRIBUTES = 16;
+  constexpr size_t MAX_PASSES = 4096;
 
   using Buffer = uint32_t;
   using Texture = uint32_t;
@@ -57,6 +58,46 @@ namespace gfx {
 
 #define MAKE_MEMORY(x) Memory { &x, sizeof(x) }
 
+  struct Color {
+    float r, g, b, a = 0;
+
+    Color(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
+  };
+
+  enum class Action {
+    NOTHING,
+    CLEAR,
+  };
+
+  struct ColorAction {
+    Action action = Action::CLEAR;
+    Color color;
+  };
+
+  struct DepthAction {
+    Action action = Action::CLEAR;
+    float value = 1.0f;
+  };
+
+  struct StencilAction {
+    Action action = Action::CLEAR;
+    float value = 0.0f;
+  };
+
+  struct PassAction {
+    ColorAction color_action;
+    DepthAction depth_action;
+    StencilAction stencil_action;
+  };
+
+  struct PassDesc {
+
+  };
+
+  struct PassData {
+
+  };
+
   struct BufferDesc {
     Memory mem;
     BufferType type;
@@ -103,6 +144,8 @@ namespace gfx {
   class Renderer {
   public:
     void init(void* glProcAdress);
+    void begin_pass(Pass pass, const PassAction& action);
+    void begin_default_pass(const PassAction& action);
     void apply_pipeline(Pipeline pipe);
     void apply_bindings(Bindings bind);
     void draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances);
@@ -119,5 +162,7 @@ namespace gfx {
     uint32_t _shader_id = 0;
     uint32_t _pass_id = 0;
     uint32_t _pipeline_id = 0;
+
+    PassData _passes[MAX_PASSES];
   };
 }

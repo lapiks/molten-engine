@@ -14,6 +14,15 @@ namespace gfx {
     ctx.draw(first_element, num_elements, num_instances);
   }
 
+  void Renderer::begin_pass(Pass pass, const PassAction& action) {
+    PassData& pass_data = _passes[pass];
+    ctx.begin_pass(&pass_data, action);
+  }
+
+  void Renderer::begin_default_pass(const PassAction& action) {
+    ctx.begin_pass(0, action);
+  }
+
   void Renderer::apply_pipeline(Pipeline pipe) {
     ctx.apply_pipeline(pipe);
   }

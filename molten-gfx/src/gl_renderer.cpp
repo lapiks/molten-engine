@@ -11,8 +11,34 @@ namespace gfx {
       return;
     }
 
+    // global vao
     glGenVertexArrays(1, &_state.global_vao);
     glBindVertexArray(_state.global_vao);
+
+    // default framebuffer
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&_state.default_framebuffer);
+  }
+
+  void GLRenderer::begin_pass(PassData* pass, const PassAction& action) {
+    if (!pass) {
+      glBindFramebuffer(GL_FRAMEBUFFER, _state.default_framebuffer);
+    }
+    else {
+
+    }
+    GLbitfield buffer_bit;
+    if (action.color_action.action == Action::CLEAR) {
+      const Color& color = action.color_action.color;
+      glClearColor(color.r, color.g, color.b, color.a);
+      buffer_bit |= GL_COLOR_BUFFER_BIT;
+    }
+    if (action.depth_action.action == Action::CLEAR) {
+      buffer_bit |= GL_DEPTH_BUFFER_BIT;
+    }
+    if (action.stencil_action.action == Action::CLEAR) {
+      buffer_bit |= GL_STENCIL_BUFFER_BIT;
+    }
+    glClear(buffer_bit);
   }
 
   void GLRenderer::apply_pipeline(Pipeline pipe) {
@@ -34,9 +60,6 @@ namespace gfx {
   }
 
   void GLRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances) {
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
     GLenum primitive = get_gl_primitive_type(_state.pipeline->pipeline_common.primitive_type);
 
     if (num_instances > 0)
