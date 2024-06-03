@@ -26,7 +26,7 @@ namespace gfx {
     else {
 
     }
-    GLbitfield buffer_bit;
+    GLbitfield buffer_bit = 0;
     if (action.color_action.action == Action::CLEAR) {
       const Color& color = action.color_action.color;
       glClearColor(color.r, color.g, color.b, color.a);
@@ -57,6 +57,10 @@ namespace gfx {
       glVertexAttribPointer(i, attr.size, attr.type, GL_FALSE, attr.stride, (void*)0);
       glEnableVertexAttribArray(i);
     }
+  }
+
+  void GLRenderer::apply_uniforms(ShaderStage stage, const Memory& mem) {
+
   }
 
   void GLRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances) {

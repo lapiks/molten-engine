@@ -114,6 +114,7 @@ int main(int, char**) {
     );
     renderer.apply_pipeline(pipe);
     renderer.apply_bindings(bind);
+    //renderer.apply_uniforms(uniforms);
     renderer.draw(0, 3, 1);
 
     SDL_GL_SwapWindow(window);

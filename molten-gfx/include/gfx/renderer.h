@@ -2,7 +2,10 @@
 
 #include <stdint.h>
 
+#define GFX_USE_OPENGL
+
 namespace gfx {
+
   constexpr size_t MAX_VERTEX_BUFFERS = 8;
   constexpr size_t MAX_ATTRIBUTES = 16;
   constexpr size_t MAX_PASSES = 4096;
@@ -13,7 +16,7 @@ namespace gfx {
   using Pass = uint32_t;
   using Pipeline = uint32_t;
 
-  enum class ShaderType {
+  enum class ShaderStage {
     VERTEX,
     FRAGMENT,
   };
@@ -51,6 +54,11 @@ namespace gfx {
     UINT32,
   };
 
+  enum class Action {
+    NOTHING,
+    CLEAR,
+  };
+
   struct Memory {
     void* data = nullptr;
     size_t size = 0;
@@ -62,11 +70,6 @@ namespace gfx {
     float r, g, b, a = 0;
 
     Color(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
-  };
-
-  enum class Action {
-    NOTHING,
-    CLEAR,
   };
 
   struct ColorAction {
@@ -148,6 +151,7 @@ namespace gfx {
     void begin_default_pass(const PassAction& action);
     void apply_pipeline(Pipeline pipe);
     void apply_bindings(Bindings bind);
+    void apply_uniforms(ShaderStage stage, const Memory& mem);
     void draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances);
 
     Buffer new_buffer(const BufferDesc& desc);

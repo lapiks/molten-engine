@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0...3.5)
+cmake_minimum_required(VERSION 3.5)
 project(
     molten-engine
     VERSION 0.1.0
@@ -8,7 +8,7 @@ project(
 add_subdirectory(third_party/SDL-release-2.30.3)
 add_subdirectory(molten-gfx)
 
-add_executable(MoltenEngine "src/main.cpp")
+add_executable(MoltenEngine "src/main.cpp" )
 
 include_directories(${CMAKE_SOURCE_DIR}/molten-gfx/include)
 

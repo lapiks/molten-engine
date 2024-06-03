@@ -2,9 +2,18 @@
 #pragma once
 
 #include "gl_renderer.h"
+#include "vk_renderer.h"
 
 namespace gfx {
+#if !(defined(GFX_USE_OPENGL) || defined(GFX_USE_VULKAN))
+#error "Please select a backend with GFX_USE_OPENGL or GFX_USE_VULKAN"
+#endif
+
+#if defined(GFX_USE_OPENGL)
   static GLRenderer ctx;
+#elif defined(GFX_USE_VULKAN)
+  static VKRenderer ctx;
+#endif
 
   void Renderer::init(void* glProcAdress) {
     ctx.init(glProcAdress);
@@ -29,6 +38,10 @@ namespace gfx {
 
   void Renderer::apply_bindings(Bindings bind) {
     ctx.apply_bindings(bind);
+  }
+
+  void Renderer::apply_uniforms(ShaderStage stage, const Memory& mem) {
+    ctx.apply_uniforms(stage, mem);
   }
 
   Buffer Renderer::new_buffer(const BufferDesc& desc) {
