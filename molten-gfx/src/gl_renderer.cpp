@@ -5,8 +5,8 @@
 #include <iostream>
 
 namespace gfx {
-  void GLRenderer::init(void* glProcAdress) {
-    if (!gladLoadGLLoader((GLADloadproc)glProcAdress)) {
+  void GLRenderer::init(const InitInfo& info) {
+    if (!gladLoadGLLoader((GLADloadproc)info.glProcAdress)) {
       std::cout << "Failed to initialize GLAD" << std::endl;
       return;
     }

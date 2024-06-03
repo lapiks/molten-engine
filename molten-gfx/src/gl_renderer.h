@@ -38,7 +38,7 @@ namespace gfx {
 
   class GLRenderer {
   public:
-    void init(void* glProcAdress);
+    void init(const InitInfo& info);
     void begin_pass(PassData* pass, const PassAction& action);
     void apply_pipeline(Pipeline pipe);
     void apply_bindings(Bindings bind);

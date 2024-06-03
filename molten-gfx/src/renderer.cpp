@@ -15,8 +15,8 @@ namespace gfx {
   static VKRenderer ctx;
 #endif
 
-  void Renderer::init(void* glProcAdress) {
-    ctx.init(glProcAdress);
+  void Renderer::init(const InitInfo& info) {
+    ctx.init(info);
   }
 
   void Renderer::draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances) {

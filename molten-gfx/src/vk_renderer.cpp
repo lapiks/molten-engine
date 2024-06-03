@@ -1,6 +1,6 @@
 #include "vk_renderer.h"
 
-void gfx::VKRenderer::init(void* glProcAdress) {
+void gfx::VKRenderer::init(const InitInfo& info) {
 }
 
 void gfx::VKRenderer::begin_pass(PassData* pass, const PassAction& action) {

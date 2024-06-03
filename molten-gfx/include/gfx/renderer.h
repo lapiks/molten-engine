@@ -59,6 +59,12 @@ namespace gfx {
     CLEAR,
   };
 
+  struct InitInfo {
+#if defined(GFX_USE_OPENGL)
+    void* glProcAdress;
+#endif
+  };
+
   struct Memory {
     void* data = nullptr;
     size_t size = 0;
@@ -146,7 +152,7 @@ namespace gfx {
 
   class Renderer {
   public:
-    void init(void* glProcAdress);
+    void init(const InitInfo& info);
     void begin_pass(Pass pass, const PassAction& action);
     void begin_default_pass(const PassAction& action);
     void apply_pipeline(Pipeline pipe);
