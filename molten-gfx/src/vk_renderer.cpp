@@ -6,13 +6,13 @@ void gfx::VKRenderer::init(const InitInfo& info) {
 void gfx::VKRenderer::begin_pass(PassData* pass, const PassAction& action) {
 }
 
-void gfx::VKRenderer::apply_pipeline(Pipeline pipe) {
+void gfx::VKRenderer::set_pipeline(Pipeline pipe) {
 }
 
-void gfx::VKRenderer::apply_bindings(Bindings bind) {
+void gfx::VKRenderer::set_bindings(Bindings bind) {
 }
 
-void gfx::VKRenderer::apply_uniforms(ShaderStage stage, const Memory& mem) {
+void gfx::VKRenderer::set_uniforms(ShaderStage stage, const Memory& mem) {
 }
 
 void gfx::VKRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances) {

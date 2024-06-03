@@ -53,9 +53,9 @@ int main(int, char**) {
   );
 
   float vertices[] = {
-  -0.5f, -0.5f, 0.0f, // left  
-   0.5f, -0.5f, 0.0f, // right 
-   0.0f,  0.5f, 0.0f  // top   
+    -0.5f, -0.5f, 0.0f, // left  
+     0.5f, -0.5f, 0.0f, // right 
+     0.0f,  0.5f, 0.0f  // top   
   };
 
   gfx::Buffer vbuffer = renderer.new_buffer(
@@ -112,8 +112,8 @@ int main(int, char**) {
         }
       }
     );
-    renderer.apply_pipeline(pipe);
-    renderer.apply_bindings(bind);
+    renderer.set_pipeline(pipe);
+    renderer.set_bindings(bind);
     //renderer.apply_uniforms(uniforms);
     renderer.draw(0, 3, 1);
 

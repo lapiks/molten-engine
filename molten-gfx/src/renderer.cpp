@@ -32,16 +32,16 @@ namespace gfx {
     ctx.begin_pass(0, action);
   }
 
-  void Renderer::apply_pipeline(Pipeline pipe) {
-    ctx.apply_pipeline(pipe);
+  void Renderer::set_pipeline(Pipeline pipe) {
+    ctx.set_pipeline(pipe);
   }
 
-  void Renderer::apply_bindings(Bindings bind) {
-    ctx.apply_bindings(bind);
+  void Renderer::set_bindings(Bindings bind) {
+    ctx.set_bindings(bind);
   }
 
-  void Renderer::apply_uniforms(ShaderStage stage, const Memory& mem) {
-    ctx.apply_uniforms(stage, mem);
+  void Renderer::set_uniforms(ShaderStage stage, const Memory& mem) {
+    ctx.set_uniforms(stage, mem);
   }
 
   Buffer Renderer::new_buffer(const BufferDesc& desc) {

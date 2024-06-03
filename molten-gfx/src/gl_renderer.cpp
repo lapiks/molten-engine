@@ -41,13 +41,13 @@ namespace gfx {
     glClear(buffer_bit);
   }
 
-  void GLRenderer::apply_pipeline(Pipeline pipe) {
+  void GLRenderer::set_pipeline(Pipeline pipe) {
     _state.pipeline = &_pipelines[pipe];
 
     glUseProgram(_state.pipeline->shader.id);
   }
 
-  void GLRenderer::apply_bindings(Bindings bind) {
+  void GLRenderer::set_bindings(Bindings bind) {
     // todo manage multiple VBO?
     _state.vertex_buffer = &_buffers[bind.vertex_buffers[0]];
 
@@ -59,7 +59,7 @@ namespace gfx {
     }
   }
 
-  void GLRenderer::apply_uniforms(ShaderStage stage, const Memory& mem) {
+  void GLRenderer::set_uniforms(ShaderStage stage, const Memory& mem) {
 
   }
 
