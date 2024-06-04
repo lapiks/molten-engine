@@ -20,4 +20,4 @@ cmake --build build
 - SDL2 for windowing, input, sound...
 - GLM for linear algebra
 - GLAD for loading OpenGL functions
-- vk-bootstrap for simplifying the initialization of Vulkan
+- vk-bootstrap for simplifying the Vulkan initialization
