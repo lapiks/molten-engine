@@ -4,7 +4,7 @@ project(
     LANGUAGES CXX C
 )
 
-add_library(MoltenGfx STATIC "src/renderer.cpp"  "src/gl_renderer.cpp" "src/gl_utils.h" "src/vk_renderer.h" "src/vk_renderer.cpp")
+add_library(MoltenGfx STATIC "src/renderer.cpp"  "src/gl_renderer.cpp" "src/gl_utils.h" "src/vk_renderer.h" "src/vk_renderer.cpp" "src/vk_utils.h")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/gfx)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/include)
