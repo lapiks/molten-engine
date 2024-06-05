@@ -5,7 +5,7 @@ project(
     LANGUAGES CXX C
 )
 
-add_subdirectory(third_party/SDL-release-2.30.3)
+add_subdirectory(third_party/SDL)
 add_subdirectory(molten-gfx)
 
 add_executable(MoltenEngine "src/main.cpp" )
