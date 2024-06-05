@@ -12,7 +12,7 @@ A work in progress C++ game engine.
 This project uses CMake as build system.
 ```
 git clone --recurse-submodules https://github.com/lapiks/molten-engine.git
-cmake -S molten-engine -B build
+cmake . -B build
 cmake --build build 
 ```
 
