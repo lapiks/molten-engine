@@ -17,8 +17,10 @@ add_subdirectory(molten-gfx)
 add_executable(MoltenEngine "src/main.cpp" )
 
 include_directories(${CMAKE_SOURCE_DIR}/molten-gfx/include)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/stb_image)
 
 target_link_libraries(MoltenEngine PRIVATE SDL2::SDL2)
+target_link_libraries(MoltenEngine PRIVATE fastgltf)
 target_link_libraries(MoltenEngine PRIVATE MoltenGfx)
 
 set_target_properties(MoltenEngine PROPERTIES
