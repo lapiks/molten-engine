@@ -5,7 +5,7 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 
-#include <gfx/renderer.h>
+#include "renderer.h"
 
 int main(int, char**) {
   SDL_SetMainReady();
@@ -50,13 +50,13 @@ int main(int, char**) {
     "{\n"
     "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
     "}\n\0";
-  
+
   gfx::Shader shader = renderer.new_shader(
     gfx::ShaderDesc{
       vs_src,
       fs_src,
     }
-  );
+    );
 
   float vertices[] = {
     -0.5f, -0.5f, 0.0f, // left  
@@ -69,7 +69,7 @@ int main(int, char**) {
       gfx::MAKE_MEMORY(vertices),
       gfx::BufferType::VERTEX_BUFFER,
     }
-  );
+    );
 
   uint16_t indices[] = {
     1, 2, 3
@@ -80,7 +80,7 @@ int main(int, char**) {
       gfx::MAKE_MEMORY(indices),
       gfx::BufferType::INDEX_BUFFER,
     }
-  );
+    );
 
   gfx::VertexLayout layout;
   layout.attributes[0].format = gfx::AttributeFormat::FLOAT3;
@@ -91,7 +91,7 @@ int main(int, char**) {
       layout,
       gfx::IndexType::UINT16,
     }
-  );
+    );
 
   gfx::Bindings bind;
   bind.vertex_buffers[0] = vbuffer;
@@ -115,7 +115,7 @@ int main(int, char**) {
           stop_rendering = false;
         }
       }
-      break;
+                          break;
 
       default:
         break;

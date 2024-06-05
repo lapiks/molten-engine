@@ -1,5 +1,7 @@
 #include "vk_renderer.h"
 
+#include "VkBootstrap.h"
+
 #define VK_CHECK(x)                                                        \
   do {                                                                     \
       VkResult err = x;                                                    \
@@ -10,6 +12,24 @@
   } while (0)
 
 void gfx::VKRenderer::init(const InitInfo& info) {
+  vkb::InstanceBuilder builder;
+
+  bool use_validation_layers = true;
+
+  //make the vulkan instance, with basic debug features
+  auto inst_ret = builder.set_app_name("MoltenGfx")
+    .request_validation_layers(use_validation_layers)
+    .use_default_debug_messenger()
+    .require_api_version(1, 3, 0)
+    .build();
+
+  vkb::Instance vkb_inst = inst_ret.value();
+
+  //grab the instance 
+  _instance = vkb_inst.instance;
+  _debug_messenger = vkb_inst.debug_messenger;
+
+
 }
 
 void gfx::VKRenderer::begin_pass(PassData* pass, const PassAction& action) {

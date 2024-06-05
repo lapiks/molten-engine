@@ -1,15 +1,10 @@
-project(
-    molten-core
-    VERSION 0.1.0
-    LANGUAGES CXX C
-)
+find_package(Vulkan REQUIRED)
+find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{VULKAN_SDK}/Bin/ $ENV{VULKAN_SDK}/Bin32/)
 
-add_library(MoltenCore STATIC "src/engine.cpp")
+add_subdirectory(src/gfx)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include/gfx)
+add_library(MoltenCore "src/engine.cpp" )
 
-set_target_properties(MoltenCore PROPERTIES
-    CXX_STANDARD 20
-    CXX_EXTENSIONS OFF
-    COMPILE_WARNING_AS_ERROR ON
-)
+include_directories(${CMAKE_SOURCE_DIR}/third_party/stb_image)
+
+target_link_libraries(MoltenCore PRIVATE fastgltf)

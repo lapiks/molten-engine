@@ -1,0 +1,18 @@
+add_executable(MoltenRuntime "src/main.cpp" )
+
+target_link_libraries(MoltenRuntime PRIVATE SDL2::SDL2)
+target_link_libraries(MoltenRuntime PRIVATE MoltenCore)
+
+set_target_properties(MoltenRuntime PROPERTIES
+    CXX_STANDARD 20
+    CXX_EXTENSIONS OFF
+    COMPILE_WARNING_AS_ERROR ON
+)
+
+if (WIN32)
+    add_custom_command(
+        TARGET MoltenRuntime POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:SDL2::SDL2>" "$<TARGET_FILE_DIR:MoltenRuntime>"
+        VERBATIM
+    )
+endif()

@@ -1,0 +1,25 @@
+add_executable(MoltenGfxTest "gl_renderer.cpp" "gl_renderer.h" "vk_renderer.cpp" "vk_renderer.h" "vk_utils.h" "gl_utils.h" "renderer.cpp" "renderer.h" "main.cpp")
+
+find_package(Vulkan REQUIRED)
+find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{VULKAN_SDK}/Bin/ $ENV{VULKAN_SDK}/Bin32/)
+
+target_link_libraries(MoltenGfxTest PRIVATE SDL2::SDL2)
+target_link_libraries(MoltenGfxTest PRIVATE vk-bootstrap)
+target_link_libraries(MoltenGfxTest PRIVATE Glad)
+target_include_directories(MoltenGfxTest PUBLIC ${Vulkan_INCLUDE_DIR})
+target_include_directories(MoltenGfxTest PUBLIC ${CMAKE_SOURCE_DIR}/third_party/vk-bootstrap/src)
+target_include_directories(MoltenGfxTest PUBLIC ${CMAKE_SOURCE_DIR}/third_party/glad/include)
+
+set_target_properties(MoltenGfxTest PROPERTIES
+    CXX_STANDARD 20
+    CXX_EXTENSIONS OFF
+    COMPILE_WARNING_AS_ERROR ON
+)
+
+if (WIN32)
+    add_custom_command(
+        TARGET MoltenGfxTest POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:SDL2::SDL2>" "$<TARGET_FILE_DIR:MoltenGfxTest>"
+        VERBATIM
+    )
+endif()

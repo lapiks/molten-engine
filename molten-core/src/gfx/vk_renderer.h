@@ -1,4 +1,5 @@
 #include "renderer.h"
+#include <vulkan/vulkan.h>
 
 namespace gfx {
   class VKRenderer {
@@ -15,5 +16,12 @@ namespace gfx {
     bool new_shader(Shader h, const ShaderDesc& desc);
     bool new_pass(Pass h);
     bool new_pipeline(Pipeline h, const PipelineDesc& desc);
+
+  private:
+    VkInstance _instance;// Vulkan library handle
+    VkDebugUtilsMessengerEXT _debug_messenger;// Vulkan debug output handle
+    VkPhysicalDevice _chosenGPU;// GPU chosen as the default device
+    VkDevice _device; // Vulkan device for commands
+    VkSurfaceKHR _surface;// Vulkan window surface
   };
 }
