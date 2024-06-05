@@ -6,9 +6,10 @@ project(
 )
 
 add_subdirectory(third_party/glad)
-add_subdirectory(third_party/SDL)
-add_subdirectory(third_party/fastgltf)
+add_subdirectory(third_party/fastgltf-0.7.1)
 add_subdirectory(third_party/vk-bootstrap)
+add_subdirectory(third_party/SDL-release-2.30.3)
+add_subdirectory(third_party/VulkanMemoryAllocator-3.1.0)
 add_subdirectory(molten-core)
 add_subdirectory(molten-editor)
 add_subdirectory(molten-runtime)
