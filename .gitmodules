@@ -5,3 +5,9 @@
 	path = third_party/SDL
 	url = https://github.com/libsdl-org/SDL.git
 	branch = release-2.30.x
+[submodule "molten-gfx/third_party/VulkanMemoryAllocator"]
+	path = molten-gfx/third_party/VulkanMemoryAllocator
+	url = https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+[submodule "molten-gfx/third_party/glm"]
+	path = molten-gfx/third_party/glm
+	url = https://github.com/g-truc/glm.git

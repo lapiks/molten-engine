@@ -8,9 +8,13 @@ add_library(MoltenGfx STATIC "src/renderer.cpp"  "src/gl_renderer.cpp" "src/gl_u
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/gfx)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glad/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glm)
 
 add_subdirectory(third_party/glad)
+add_subdirectory(third_party/VulkanMemoryAllocator)
+
 target_link_libraries(MoltenGfx PRIVATE Glad)
+target_link_libraries(MoltenGfx PRIVATE GPUOpen::VulkanMemoryAllocator)
 
 set_target_properties(MoltenGfx PROPERTIES
     CXX_STANDARD 20
