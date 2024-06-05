@@ -21,6 +21,21 @@ target_link_libraries(MoltenEngine PRIVATE SDL2::SDL2)
 target_link_libraries(MoltenEngine PRIVATE fastgltf)
 target_link_libraries(MoltenEngine PRIVATE MoltenGfx)
 
+add_library(imgui STATIC)
+target_include_directories(imgui PUBLIC third_party/imgui)
+target_sources(imgui PRIVATE 
+  third_party/imgui/imgui.h
+  third_party/imgui/imgui.cpp
+  third_party/imgui/imgui_demo.cpp
+  third_party/imgui/imgui_draw.cpp
+  third_party/imgui/imgui_widgets.cpp
+  third_party/imgui/imgui_tables.cpp
+  third_party/imgui/backends/imgui_impl_opengl3.cpp
+  third_party/imgui/backends/imgui_impl_vulkan.cpp
+  third_party/imgui/backends/imgui_impl_sdl2.cpp
+)
+target_link_libraries(imgui PUBLIC Vulkan::Vulkan SDL2::SDL2)
+
 set_target_properties(MoltenEngine PROPERTIES
     CXX_STANDARD 20
     CXX_EXTENSIONS OFF
