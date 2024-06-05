@@ -4,7 +4,7 @@ project(
     LANGUAGES CXX C
 )
 
-add_library(MoltenCore STATIC)
+add_library(MoltenCore STATIC "src/engine.cpp")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include/gfx)
 

@@ -4,6 +4,9 @@ project(
     LANGUAGES CXX C
 )
 
+find_package(Vulkan REQUIRED)
+find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{VULKAN_SDK}/Bin/ $ENV{VULKAN_SDK}/Bin32/)
+
 add_library(MoltenGfx STATIC "src/renderer.cpp"  "src/gl_renderer.cpp" "src/gl_utils.h" "src/vk_renderer.h" "src/vk_renderer.cpp" "src/vk_utils.h")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include/gfx)
