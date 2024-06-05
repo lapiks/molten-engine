@@ -10,6 +10,7 @@ find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{
 
 add_subdirectory(third_party/SDL)
 add_subdirectory(third_party/fastgltf)
+add_subdirectory(molten-core)
 add_subdirectory(molten-gfx)
 
 add_executable(MoltenEngine "src/main.cpp" )
