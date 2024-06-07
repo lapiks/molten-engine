@@ -4,6 +4,8 @@
 
 #define GFX_USE_OPENGL
 
+struct SDL_Window;
+
 namespace gfx {
 
   constexpr size_t MAX_VERTEX_BUFFERS = 8;
@@ -60,9 +62,7 @@ namespace gfx {
   };
 
   struct InitInfo {
-#if defined(GFX_USE_OPENGL)
-    void* glProcAdress;
-#endif
+    SDL_Window* window = nullptr;
   };
 
   struct Memory {

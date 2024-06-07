@@ -35,7 +35,7 @@ int main(int, char**) {
   // vsync
   SDL_GL_SetSwapInterval(1);
   gfx::Renderer renderer;
-  renderer.init(gfx::InitInfo{ SDL_GL_GetProcAddress });
+  renderer.init(gfx::InitInfo{ window });
 
   const char* vs_src = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"

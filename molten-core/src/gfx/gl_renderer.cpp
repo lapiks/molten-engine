@@ -4,9 +4,11 @@
 
 #include <iostream>
 
+#include <SDL2/SDL.h>
+
 namespace gfx {
   void GLRenderer::init(const InitInfo& info) {
-    if (!gladLoadGLLoader((GLADloadproc)info.glProcAdress)) {
+    if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
       std::cout << "Failed to initialize GLAD" << std::endl;
       return;
     }

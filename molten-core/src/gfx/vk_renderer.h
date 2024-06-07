@@ -4,7 +4,16 @@
 namespace gfx {
   class VKRenderer {
   public:
+    struct Swapchain {
+      VkSwapchainKHR swapchain;
+      VkFormat image_format;
+      std::vector<VkImage> images;
+      std::vector<VkImageView> image_views;
+      VkExtent2D extent;
+    };
+
     void init(const InitInfo& info);
+    void shutdown();
     void begin_pass(PassData* pass, const PassAction& action);
     void set_pipeline(Pipeline pipe);
     void set_bindings(Bindings bind);
@@ -18,10 +27,11 @@ namespace gfx {
     bool new_pipeline(Pipeline h, const PipelineDesc& desc);
 
   private:
-    VkInstance _instance;// Vulkan library handle
-    VkDebugUtilsMessengerEXT _debug_messenger;// Vulkan debug output handle
-    VkPhysicalDevice _chosenGPU;// GPU chosen as the default device
+    VkInstance _instance; // Vulkan library handle
+    VkDebugUtilsMessengerEXT _debug_messenger; // Vulkan debug output handle
+    VkPhysicalDevice _chosen_gpu; // GPU chosen as the default device
     VkDevice _device; // Vulkan device for commands
-    VkSurfaceKHR _surface;// Vulkan window surface
+    VkSurfaceKHR _surface; // Vulkan window surface
+    Swapchain _swapchain;
   };
 }
