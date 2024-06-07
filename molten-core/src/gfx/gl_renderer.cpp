@@ -21,6 +21,10 @@ namespace gfx {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&_state.default_framebuffer);
   }
 
+  void GLRenderer::shutdown() {
+
+  }
+
   void GLRenderer::begin_pass(PassData* pass, const PassAction& action) {
     if (!pass) {
       glBindFramebuffer(GL_FRAMEBUFFER, _state.default_framebuffer);

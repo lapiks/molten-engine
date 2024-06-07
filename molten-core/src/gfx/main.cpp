@@ -14,26 +14,33 @@ int main(int, char**) {
     return 1;
   }
 
-  int windowFlags = SDL_WINDOW_OPENGL;
-  SDL_Window* window = SDL_CreateWindow("Molten Engine", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, windowFlags);
+  int windowFlags = SDL_WINDOW_VULKAN;
+  SDL_Window* window = SDL_CreateWindow(
+    "Molten Engine", 
+    SDL_WINDOWPOS_UNDEFINED, 
+    SDL_WINDOWPOS_UNDEFINED, 
+    640, 
+    480, 
+    windowFlags
+  );
   if (!window) {
     std::cerr << "Failed to initialize SDL window. Error: " << SDL_GetError() << std::endl;
     return 1;
   }
 
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+  //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  //SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-  SDL_GLContext gl_context = SDL_GL_CreateContext(window);
-  if (!gl_context) {
-    std::cerr << "Failed to initialize GL context. Error: " << SDL_GetError() << std::endl;
-    return 1;
-  }
+  //SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+  //if (!gl_context) {
+  //  std::cerr << "Failed to initialize GL context. Error: " << SDL_GetError() << std::endl;
+  //  return 1;
+  //}
 
   // vsync
-  SDL_GL_SetSwapInterval(1);
+  //SDL_GL_SetSwapInterval(1);
   gfx::Renderer renderer;
   renderer.init(gfx::InitInfo{ window });
 
@@ -143,7 +150,8 @@ int main(int, char**) {
     SDL_GL_SwapWindow(window);
   }
 
-  SDL_GL_DeleteContext(gl_context);
+  renderer.shutdown();
+  //SDL_GL_DeleteContext(gl_context);
   SDL_DestroyWindow(window);
   SDL_Quit();
 

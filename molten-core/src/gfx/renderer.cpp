@@ -19,6 +19,10 @@ namespace gfx {
     ctx.init(info);
   }
 
+  void Renderer::shutdown() {
+    ctx.shutdown();
+  }
+
   void Renderer::draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances) {
     ctx.draw(first_element, num_elements, num_instances);
   }

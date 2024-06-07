@@ -2,6 +2,7 @@
 
 #include "VkBootstrap.h"
 #include <SDL2/SDL_vulkan.h>
+#include <iostream>
 
 #define VK_CHECK(x)                                                        \
   do {                                                                     \
@@ -15,55 +16,55 @@
 void gfx::VKRenderer::init(const InitInfo& info) {
   vkb::InstanceBuilder builder;
 
-  bool use_validation_layers = true;
-
-  // make the vulkan instance, with basic debug features
-  auto inst_ret = builder.set_app_name("MoltenEngine")
-    .request_validation_layers(use_validation_layers)
+  // create the instance
+  vkb::Instance vkb_inst = builder.set_app_name("MoltenEngine")
+    .request_validation_layers()
     .use_default_debug_messenger()
     .require_api_version(1, 3, 0)
-    .build();
+    .build()
+    .value();
 
-  vkb::Instance vkb_inst = inst_ret.value();
-
-  // grab the instance 
   _instance = vkb_inst.instance;
   _debug_messenger = vkb_inst.debug_messenger;
 
-  // surface creation with SDL
-  SDL_Vulkan_CreateSurface(info.window, _instance, &_surface);
-
-  // vulkan 1.3 features
-  VkPhysicalDeviceVulkan13Features features {};
-  features.dynamicRendering = true;
-  features.synchronization2 = true;
+  // create the surface
+  if (SDL_Vulkan_CreateSurface(info.window, _instance, &_surface) != SDL_TRUE) {
+    std::cout << "Failed to create Vulkan surface: " << SDL_GetError() << std::endl;
+    std::exit(1);
+  }
 
   // vulkan 1.2 features
-  VkPhysicalDeviceVulkan12Features features12 {};
-  features12.bufferDeviceAddress = true;
-  features12.descriptorIndexing = true;
+  const VkPhysicalDeviceVulkan12Features features12{
+    .descriptorIndexing = true,
+    .bufferDeviceAddress = true,
+  };
 
-  // use vkbootstrap to select a gpu. 
-  // We want a gpu that can write to the SDL surface and supports vulkan 1.3 with the correct features
+  // vulkan 1.3 features
+  const VkPhysicalDeviceVulkan13Features features{
+    .synchronization2 = true,
+    .dynamicRendering = true,
+  };
+
+  // create the physical device
   vkb::PhysicalDeviceSelector selector{ vkb_inst };
   vkb::PhysicalDevice physicalDevice = selector
     .set_minimum_version(1, 3)
-    .set_required_features_13(features)
     .set_required_features_12(features12)
+    .set_required_features_13(features)
     .set_surface(_surface)
     .select()
     .value();
 
 
-  // create the final vulkan device
+  // create the device
   vkb::DeviceBuilder deviceBuilder{ physicalDevice };
 
   vkb::Device vkbDevice = deviceBuilder.build().value();
 
-  // Get the VkDevice handle used in the rest of a vulkan application
   _device = vkbDevice.device;
   _chosen_gpu = physicalDevice.physical_device;
 
+  // create the swapchain
   vkb::SwapchainBuilder swapchainBuilder{ 
     _chosen_gpu, 
     _device, 
@@ -93,7 +94,23 @@ void gfx::VKRenderer::init(const InitInfo& info) {
 }
 
 void gfx::VKRenderer::shutdown() {
+  // swapchain
+  vkDestroySwapchainKHR(_device, _swapchain.swapchain, nullptr);
 
+  // swapchain resources
+  for (VkImageView iv : _swapchain.image_views) {
+
+    vkDestroyImageView(_device, iv, nullptr);
+  }
+
+  // surface
+  vkDestroySurfaceKHR(_instance, _surface, nullptr);
+  // device
+  vkDestroyDevice(_device, nullptr);
+  // debug utils
+  vkb::destroy_debug_utils_messenger(_instance, _debug_messenger);
+  // instance
+  vkDestroyInstance(_instance, nullptr);
 }
 
 void gfx::VKRenderer::begin_pass(PassData* pass, const PassAction& action) {

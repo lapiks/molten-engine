@@ -2,7 +2,8 @@
 
 #include <stdint.h>
 
-#define GFX_USE_OPENGL
+//#define GFX_USE_OPENGL
+#define GFX_USE_VULKAN
 
 struct SDL_Window;
 
@@ -153,6 +154,7 @@ namespace gfx {
   class Renderer {
   public:
     void init(const InitInfo& info);
+    void shutdown();
     void begin_pass(Pass pass, const PassAction& action);
     void begin_default_pass(const PassAction& action);
     void set_pipeline(Pipeline pipe);
