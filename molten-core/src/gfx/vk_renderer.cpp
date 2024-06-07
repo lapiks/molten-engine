@@ -73,14 +73,14 @@ void gfx::VKRenderer::init(const InitInfo& info) {
   _swapchain.image_format = VK_FORMAT_B8G8R8A8_UNORM;
 
   int w, h;
-  SDL_GetWindowSize(SDL_Window * window, &w, &h);
+  SDL_GetWindowSize(info.window, &w, &h);
 
   vkb::Swapchain vkbSwapchain = swapchainBuilder
     //.use_default_format_selection()
     .set_desired_format(VkSurfaceFormatKHR{ .format = _swapchain.image_format, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR })
     // use vsync present mode
     .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
-    .set_desired_extent(info.window.get, height)
+    .set_desired_extent(w, h)
     .add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
     .build()
     .value();

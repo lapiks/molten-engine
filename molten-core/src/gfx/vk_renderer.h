@@ -1,6 +1,8 @@
 #include "renderer.h"
 #include <vulkan/vulkan.h>
 
+#include <vector>
+
 namespace gfx {
   class VKRenderer {
   public:
