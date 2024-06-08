@@ -7,6 +7,9 @@
 
 #include "renderer.h"
 
+//#define USE_OPENGL
+#define USE_VULKAN
+
 int main(int, char**) {
   SDL_SetMainReady();
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -14,7 +17,11 @@ int main(int, char**) {
     return 1;
   }
 
+#ifdef USE_OPENGL
+  int windowFlags = SDL_WINDOW_OPENGL;
+#else 
   int windowFlags = SDL_WINDOW_VULKAN;
+#endif
   SDL_Window* window = SDL_CreateWindow(
     "Molten Engine", 
     SDL_WINDOWPOS_UNDEFINED, 
@@ -28,19 +35,21 @@ int main(int, char**) {
     return 1;
   }
 
-  //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  //SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+#ifdef USE_OPENGL
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
-  //SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-  //SDL_GLContext gl_context = SDL_GL_CreateContext(window);
-  //if (!gl_context) {
-  //  std::cerr << "Failed to initialize GL context. Error: " << SDL_GetError() << std::endl;
-  //  return 1;
-  //}
-
+  SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+  if (!gl_context) {
+    std::cerr << "Failed to initialize GL context. Error: " << SDL_GetError() << std::endl;
+    return 1;
+  }
   // vsync
-  //SDL_GL_SetSwapInterval(1);
+  SDL_GL_SetSwapInterval(1);
+#endif
+
   gfx::Renderer renderer;
   renderer.init(gfx::InitInfo{ window });
 
@@ -151,7 +160,9 @@ int main(int, char**) {
   }
 
   renderer.shutdown();
-  //SDL_GL_DeleteContext(gl_context);
+#ifdef USE_OPENGL
+  SDL_GL_DeleteContext(gl_context);
+#endif
   SDL_DestroyWindow(window);
   SDL_Quit();
 
