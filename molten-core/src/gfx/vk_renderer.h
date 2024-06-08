@@ -4,6 +4,9 @@
 #include <vector>
 
 namespace gfx {
+
+  constexpr unsigned int FRAME_OVERLAP = 2;
+
   class VKRenderer {
   public:
     struct Swapchain {
@@ -12,6 +15,12 @@ namespace gfx {
       std::vector<VkImage> images;
       std::vector<VkImageView> image_views;
       VkExtent2D extent;
+    };
+
+    struct FrameData {
+
+      VkCommandPool command_pool;
+      VkCommandBuffer main_command_buffer;
     };
 
     void init(const InitInfo& info);
@@ -28,12 +37,22 @@ namespace gfx {
     bool new_pass(Pass h);
     bool new_pipeline(Pipeline h, const PipelineDesc& desc);
 
+    FrameData& get_current_frame() { return _frames[_frame_number % FRAME_OVERLAP]; };
+
   private:
-    VkInstance _instance; // Vulkan library handle
-    VkDebugUtilsMessengerEXT _debug_messenger; // Vulkan debug output handle
-    VkPhysicalDevice _chosen_gpu; // GPU chosen as the default device
-    VkDevice _device; // Vulkan device for commands
-    VkSurfaceKHR _surface; // Vulkan window surface
+    void init_commands();
+
+    VkInstance _instance;
+    VkDebugUtilsMessengerEXT _debug_messenger;
+    VkPhysicalDevice _chosenGpu;
+    VkDevice _device;
+    VkSurfaceKHR _surface;
     Swapchain _swapchain;
+    FrameData _frames[FRAME_OVERLAP];
+    VkQueue _graphics_queue;
+    uint32_t _graphics_queue_family;
+
+    uint32_t _frame_number = 0;
+    bool _is_initialized = false;
   };
 }

@@ -6,14 +6,16 @@
 
 #define VK_CHECK(x)                                                        \
   do {                                                                     \
-      VkResult err = x;                                                    \
-      if (err) {                                                           \
-            fmt::print("Detected Vulkan error: {}", string_VkResult(err)); \
-          abort();                                                         \
-      }                                                                    \
+      VkResult res = x;                                                    \
+      assert(res == VK_SUCCESS);                                           \
   } while (0)
 
 void gfx::VKRenderer::init(const InitInfo& info) {
+  if (_is_initialized) {
+    std::cout << "Failed to init the VKRenderer. The VKRenderer is already initialized" << std::endl;
+    return;
+  }
+
   vkb::InstanceBuilder builder;
 
   // create the instance
@@ -62,11 +64,11 @@ void gfx::VKRenderer::init(const InitInfo& info) {
   vkb::Device vkbDevice = deviceBuilder.build().value();
 
   _device = vkbDevice.device;
-  _chosen_gpu = physicalDevice.physical_device;
+  _chosenGpu = physicalDevice.physical_device;
 
   // create the swapchain
   vkb::SwapchainBuilder swapchainBuilder{ 
-    _chosen_gpu, 
+    _chosenGpu, 
     _device, 
     _surface 
   };
@@ -91,26 +93,41 @@ void gfx::VKRenderer::init(const InitInfo& info) {
   _swapchain.swapchain = vkbSwapchain.swapchain;
   _swapchain.images = vkbSwapchain.get_images().value();
   _swapchain.image_views = vkbSwapchain.get_image_views().value();
+
+  // get a queue of graphics type
+  _graphics_queue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
+  // and queue family
+  _graphics_queue_family = vkbDevice.get_queue_index(vkb::QueueType::graphics).value();
+
+  _is_initialized = true;
 }
 
 void gfx::VKRenderer::shutdown() {
-  // swapchain
-  vkDestroySwapchainKHR(_device, _swapchain.swapchain, nullptr);
+  if (_is_initialized) {
+    vkDeviceWaitIdle(_device);
 
-  // swapchain resources
-  for (VkImageView iv : _swapchain.image_views) {
+    for (int i = 0; i < FRAME_OVERLAP; i++) {
+      // command pool
+      vkDestroyCommandPool(_device, _frames[i].command_pool, nullptr);
+    }
 
-    vkDestroyImageView(_device, iv, nullptr);
-  }
+    // swapchain
+    vkDestroySwapchainKHR(_device, _swapchain.swapchain, nullptr);
 
-  // surface
-  vkDestroySurfaceKHR(_instance, _surface, nullptr);
-  // device
-  vkDestroyDevice(_device, nullptr);
-  // debug utils
-  vkb::destroy_debug_utils_messenger(_instance, _debug_messenger);
-  // instance
-  vkDestroyInstance(_instance, nullptr);
+    // swapchain resources
+    for (VkImageView iv : _swapchain.image_views) {
+      vkDestroyImageView(_device, iv, nullptr);
+    }
+
+    // surface
+    vkDestroySurfaceKHR(_instance, _surface, nullptr);
+    // device
+    vkDestroyDevice(_device, nullptr);
+    // debug utils
+    vkb::destroy_debug_utils_messenger(_instance, _debug_messenger);
+    // instance
+    vkDestroyInstance(_instance, nullptr);
+  } 
 }
 
 void gfx::VKRenderer::begin_pass(PassData* pass, const PassAction& action) {
@@ -146,4 +163,40 @@ bool gfx::VKRenderer::new_pass(Pass h) {
 
 bool gfx::VKRenderer::new_pipeline(Pipeline h, const PipelineDesc& desc) {
   return false;
+}
+
+void gfx::VKRenderer::init_commands() {
+  VkCommandPoolCreateInfo commandPoolInfo = {};
+  commandPoolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+  commandPoolInfo.pNext = nullptr;
+  commandPoolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+  commandPoolInfo.queueFamilyIndex = _graphics_queue_family;
+
+  for (int i = 0; i < FRAME_OVERLAP; i++) {
+    // command pool
+    VK_CHECK(
+      vkCreateCommandPool(
+        _device, 
+        &commandPoolInfo, 
+        nullptr, 
+        &_frames[i].command_pool
+      )
+    );
+
+    // command buffer
+    VkCommandBufferAllocateInfo cmdAllocInfo = {};
+    cmdAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    cmdAllocInfo.pNext = nullptr;
+    cmdAllocInfo.commandPool = _frames[i].command_pool;
+    cmdAllocInfo.commandBufferCount = 1;
+    cmdAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+
+    VK_CHECK(
+      vkAllocateCommandBuffers(
+        _device, 
+        &cmdAllocInfo, 
+        &_frames[i].main_command_buffer
+      )
+    );
+  }
 }
