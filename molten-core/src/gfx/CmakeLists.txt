@@ -1,4 +1,4 @@
-add_executable(MoltenGfxTest "gl_renderer.cpp" "gl_renderer.h" "vk_renderer.cpp" "vk_renderer.h" "vk_utils.h" "gl_utils.h" "renderer.cpp" "renderer.h" "main.cpp")
+add_executable(MoltenGfxTest "gl_renderer.cpp" "gl_renderer.h" "vk_renderer.cpp" "vk_renderer.h" "vk_utils.h" "gl_utils.h" "renderer.cpp" "renderer.h" "main.cpp" "vk_utils.cpp")
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
 find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{VULKAN_SDK}/Bin/ $ENV{VULKAN_SDK}/Bin32/)

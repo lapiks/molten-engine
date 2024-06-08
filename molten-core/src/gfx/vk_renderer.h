@@ -21,6 +21,9 @@ namespace gfx {
 
       VkCommandPool command_pool;
       VkCommandBuffer main_command_buffer;
+      VkSemaphore present_semaphore; // render commands wait on the swapchain image request
+      VkSemaphore render_semaphore; // presentation sync
+      VkFence render_fence; // signal when gpu finishes rendering the frame
     };
 
     void init(const InitInfo& info);
@@ -41,6 +44,7 @@ namespace gfx {
 
   private:
     void init_commands();
+    void init_sync_structures();
 
     VkInstance _instance;
     VkDebugUtilsMessengerEXT _debug_messenger;

@@ -26,8 +26,8 @@ int main(int, char**) {
     "Molten Engine", 
     SDL_WINDOWPOS_UNDEFINED, 
     SDL_WINDOWPOS_UNDEFINED, 
-    640, 
-    480, 
+    1024, 
+    680, 
     windowFlags
   );
   if (!window) {
