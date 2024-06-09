@@ -1,7 +1,10 @@
 #include "renderer.h"
 #include <vulkan/vulkan.h>
+#include "vk_mem_alloc.h"
 
 #include <vector>
+#include <deque>
+#include <functional>
 
 namespace gfx {
 
@@ -9,6 +12,24 @@ namespace gfx {
 
   class VKRenderer {
   public:
+    struct DeletionQueue
+    {
+      std::deque<std::function<void()>> deletors;
+
+      void push_function(std::function<void()>&& function) {
+        deletors.push_back(function);
+      }
+
+      void flush() {
+        // reverse iteration
+        for (auto it = deletors.rbegin(); it != deletors.rend(); it++) {
+          (*it)();
+        }
+
+        deletors.clear();
+      }
+    };
+
     struct Swapchain {
       VkSwapchainKHR swapchain;
       VkFormat image_format;
@@ -24,6 +45,15 @@ namespace gfx {
       VkSemaphore present_semaphore; // render commands wait on the swapchain image request
       VkSemaphore render_semaphore; // presentation sync
       VkFence render_fence; // signal when gpu finishes rendering the frame
+      DeletionQueue deletion_queue;
+    };
+
+    struct AllocatedImage {
+      VkImage image;
+      VkImageView image_view;
+      VmaAllocation allocation;
+      VkExtent3D image_extent;
+      VkFormat image_format;
     };
 
     void init(const InitInfo& info);
@@ -48,13 +78,19 @@ namespace gfx {
 
     VkInstance _instance;
     VkDebugUtilsMessengerEXT _debug_messenger;
-    VkPhysicalDevice _chosenGpu;
+    VkPhysicalDevice _chosen_gpu;
     VkDevice _device;
     VkSurfaceKHR _surface;
     Swapchain _swapchain;
     FrameData _frames[FRAME_OVERLAP];
     VkQueue _graphics_queue;
     uint32_t _graphics_queue_family;
+    VmaAllocator _allocator;
+
+    AllocatedImage _draw_image;
+    VkExtent2D _draw_extent;
+
+    DeletionQueue _main_deletion_queue;
 
     uint32_t _frame_number = 0;
     bool _is_initialized = false;

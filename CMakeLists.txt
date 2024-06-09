@@ -15,6 +15,7 @@ add_subdirectory(molten-core)
 add_subdirectory(molten-editor)
 add_subdirectory(molten-runtime)
 
+#add_library(vma INTERFACE)
 add_library(vkbootstrap STATIC)
 
 target_sources(vkbootstrap PRIVATE 

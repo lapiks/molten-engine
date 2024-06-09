@@ -3,6 +3,10 @@
 
 #include "VkBootstrap.h"
 #include <SDL2/SDL_vulkan.h>
+
+#define VMA_IMPLEMENTATION
+#include "vk_mem_alloc.h"
+
 #include <iostream>
 
 #define VK_CHECK(x)                                                        \
@@ -65,11 +69,11 @@ void gfx::VKRenderer::init(const InitInfo& info) {
   vkb::Device vkbDevice = deviceBuilder.build().value();
 
   _device = vkbDevice.device;
-  _chosenGpu = physicalDevice.physical_device;
+  _chosen_gpu = physicalDevice.physical_device;
 
   // create the swapchain
   vkb::SwapchainBuilder swapchainBuilder{ 
-    _chosenGpu, 
+    _chosen_gpu, 
     _device, 
     _surface 
   };
@@ -103,6 +107,18 @@ void gfx::VKRenderer::init(const InitInfo& info) {
   init_commands();
   init_sync_structures();
 
+  // init allocator
+  VmaAllocatorCreateInfo allocatorInfo = {};
+  allocatorInfo.physicalDevice = _chosen_gpu;
+  allocatorInfo.device = _device;
+  allocatorInfo.instance = _instance;
+  allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+  vmaCreateAllocator(&allocatorInfo, &_allocator);
+
+  _main_deletion_queue.push_function([&]() {
+    vmaDestroyAllocator(_allocator);
+  });
+
   _is_initialized = true;
 }
 
@@ -110,6 +126,8 @@ void gfx::VKRenderer::shutdown() {
   if (_is_initialized) {
     // wait for the device to finish its work
     vkDeviceWaitIdle(_device);
+
+    _main_deletion_queue.flush();
 
     for (int i = 0; i < FRAME_OVERLAP; i++) {
       // command pool
@@ -157,6 +175,8 @@ void gfx::VKRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32
   VK_CHECK(vkWaitForFences(_device, 1, &get_current_frame().render_fence, true, 1000000000));
   // reset the fence
   VK_CHECK(vkResetFences(_device, 1, &get_current_frame().render_fence));
+
+  get_current_frame().deletion_queue.flush();
 
   // request image index from the swapchain
   // we set the present_semaphore to be signaled when the image is ready
