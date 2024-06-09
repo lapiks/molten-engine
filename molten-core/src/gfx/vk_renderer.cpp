@@ -71,33 +71,21 @@ void gfx::VKRenderer::init(const InitInfo& info) {
   _device = vkbDevice.device;
   _chosen_gpu = physicalDevice.physical_device;
 
+  // init the VMA allocator
+  VmaAllocatorCreateInfo allocatorInfo = {};
+  allocatorInfo.physicalDevice = _chosen_gpu;
+  allocatorInfo.device = _device;
+  allocatorInfo.instance = _instance;
+  allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
+  vmaCreateAllocator(&allocatorInfo, &_allocator);
+
+  // add the allocator to deletion queue
+  _main_deletion_queue.push_function([&]() {
+    vmaDestroyAllocator(_allocator);
+  });
+
   // create the swapchain
-  vkb::SwapchainBuilder swapchainBuilder{ 
-    _chosen_gpu, 
-    _device, 
-    _surface 
-  };
-
-  _swapchain.image_format = VK_FORMAT_B8G8R8A8_UNORM;
-
-  int w, h;
-  SDL_GetWindowSize(info.window, &w, &h);
-
-  vkb::Swapchain vkbSwapchain = swapchainBuilder
-    //.use_default_format_selection()
-    .set_desired_format(VkSurfaceFormatKHR{ .format = _swapchain.image_format, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR })
-    // use vsync present mode
-    .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
-    .set_desired_extent(w, h)
-    .add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
-    .build()
-    .value();
-
-  _swapchain.extent = vkbSwapchain.extent;
-  // store swapchain and its related images
-  _swapchain.swapchain = vkbSwapchain.swapchain;
-  _swapchain.images = vkbSwapchain.get_images().value();
-  _swapchain.image_views = vkbSwapchain.get_image_views().value();
+  init_swapchain(info.window);
 
   // get a queue of graphics type
   _graphics_queue = vkbDevice.get_queue(vkb::QueueType::graphics).value();
@@ -106,18 +94,6 @@ void gfx::VKRenderer::init(const InitInfo& info) {
 
   init_commands();
   init_sync_structures();
-
-  // init allocator
-  VmaAllocatorCreateInfo allocatorInfo = {};
-  allocatorInfo.physicalDevice = _chosen_gpu;
-  allocatorInfo.device = _device;
-  allocatorInfo.instance = _instance;
-  allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
-  vmaCreateAllocator(&allocatorInfo, &_allocator);
-
-  _main_deletion_queue.push_function([&]() {
-    vmaDestroyAllocator(_allocator);
-  });
 
   _is_initialized = true;
 }
@@ -196,34 +172,33 @@ void gfx::VKRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32
   cmd_begin_info.pInheritanceInfo = nullptr;
   cmd_begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; // tells the driver we will submit this command buffer only once
 
+  _draw_extent.width = _draw_image.image_extent.width;
+  _draw_extent.height = _draw_image.image_extent.height;
+
   VK_CHECK(vkBeginCommandBuffer(cmd, &cmd_begin_info));
 
-  // transition image into writable mode
-  // VK_IMAGE_LAYOUT_UNDEFINED: is "any layout" (and the default one)
-  // VK_IMAGE_LAYOUT_GENERAL: allows reading and writing
-  vkutil::transition_image(cmd, _swapchain.images[sc_image_idx], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
+  // transition our main draw image into general layout so we can write into it
+  // we use VK_IMAGE_LAYOUT_UNDEFINED because we will overwrite it all so we dont care about what was the older layout
+  vkutil::transition_image(cmd, _draw_image.image, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_GENERAL);
 
-  VkClearColorValue clearValue;
-  float flash = std::abs(std::sin(_frame_number / 120.f));
-  clearValue = { { 0.0f, 0.0f, flash, 1.0f } };
+  draw_background(cmd);
 
-  // clear everything (all mips etc)
-  VkImageSubresourceRange clear_range{};
-  clear_range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-  clear_range.baseMipLevel = 0;
-  clear_range.levelCount = VK_REMAINING_MIP_LEVELS;
-  clear_range.baseArrayLayer = 0;
-  clear_range.layerCount = VK_REMAINING_ARRAY_LAYERS;
+  // transition the draw image and the swapchain image into their correct transfer layouts
+  // src for the _draw_image
+  // dst for the swapchain image
+  vkutil::transition_image(cmd, _draw_image.image, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+  vkutil::transition_image(cmd, _swapchain.images[sc_image_idx], VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
-  // clear image
-  vkCmdClearColorImage(cmd, _swapchain.images[sc_image_idx], VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clear_range);
+  // execute a copy from the draw image into the swapchain image
+  vkutil::copy_image_to_image(cmd, _draw_image.image, _swapchain.images[sc_image_idx], _draw_extent, _swapchain.extent);
 
-  // transition image into presentable mode
-  vkutil::transition_image(cmd, _swapchain.images[sc_image_idx], VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
+  // transition swapchain image layout to Present so we can show it on the screen
+  vkutil::transition_image(cmd, _swapchain.images[sc_image_idx], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 
-  // end command buffer
+  // finalize the command buffer (we can no longer add commands, but it can now be executed)
   VK_CHECK(vkEndCommandBuffer(cmd));
 
+  // command buffer submit preparation
   VkCommandBufferSubmitInfo cmd_buffer_submit_info{};
   cmd_buffer_submit_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
   cmd_buffer_submit_info.pNext = nullptr;
@@ -244,6 +219,7 @@ void gfx::VKRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32
   signal_info.semaphore = get_current_frame().render_semaphore;
   signal_info.stageMask = VK_PIPELINE_STAGE_2_ALL_GRAPHICS_BIT;
 
+  // submit info
   VkSubmitInfo2 submit_info = {};
   submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
   submit_info.pNext = nullptr;
@@ -258,18 +234,18 @@ void gfx::VKRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32
   VK_CHECK(vkQueueSubmit2(_graphics_queue, 1, &submit_info, get_current_frame().render_fence));
 
   // prepare present
-  VkPresentInfoKHR presentInfo = {};
-  presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-  presentInfo.pNext = nullptr;
-  presentInfo.pSwapchains = &_swapchain.swapchain;
-  presentInfo.swapchainCount = 1;
+  VkPresentInfoKHR present_info = {};
+  present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+  present_info.pNext = nullptr;
+  present_info.pSwapchains = &_swapchain.swapchain;
+  present_info.swapchainCount = 1;
   // wait semaphore is render_semaphore, so we wait for queue submit to end before presenting the image to the screen 
-  presentInfo.pWaitSemaphores = &get_current_frame().render_semaphore;
-  presentInfo.waitSemaphoreCount = 1;
+  present_info.pWaitSemaphores = &get_current_frame().render_semaphore;
+  present_info.waitSemaphoreCount = 1;
 
-  presentInfo.pImageIndices = &sc_image_idx;
+  present_info.pImageIndices = &sc_image_idx;
 
-  VK_CHECK(vkQueuePresentKHR(_graphics_queue, &presentInfo));
+  VK_CHECK(vkQueuePresentKHR(_graphics_queue, &present_info));
 
   _frame_number++;
 }
@@ -292,6 +268,73 @@ bool gfx::VKRenderer::new_pass(Pass h) {
 
 bool gfx::VKRenderer::new_pipeline(Pipeline h, const PipelineDesc& desc) {
   return false;
+}
+
+void gfx::VKRenderer::init_swapchain(SDL_Window* window) {
+  vkb::SwapchainBuilder swapchainBuilder{
+    _chosen_gpu,
+    _device,
+    _surface
+  };
+
+  _swapchain.image_format = VK_FORMAT_B8G8R8A8_UNORM;
+
+  int w, h;
+  SDL_GetWindowSize(window, &w, &h);
+
+  vkb::Swapchain vkbSwapchain = swapchainBuilder
+    //.use_default_format_selection()
+    .set_desired_format(VkSurfaceFormatKHR{ .format = _swapchain.image_format, .colorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR })
+    // use vsync present mode
+    .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
+    .set_desired_extent(w, h)
+    .add_image_usage_flags(VK_IMAGE_USAGE_TRANSFER_DST_BIT)
+    .build()
+    .value();
+
+  _swapchain.extent = vkbSwapchain.extent;
+  // store swapchain and its related images
+  _swapchain.swapchain = vkbSwapchain.swapchain;
+  _swapchain.images = vkbSwapchain.get_images().value();
+  _swapchain.image_views = vkbSwapchain.get_image_views().value();
+
+  // render target creation
+  // todo: move this part to VKImage
+  VkExtent3D draw_image_extent = {
+    _swapchain.extent.width,
+    _swapchain.extent.height,
+    1
+  };
+
+  _draw_image.image_format = VK_FORMAT_R16G16B16A16_SFLOAT;
+  _draw_image.image_extent = draw_image_extent;
+
+  VkImageUsageFlags drawImageUsages{};
+  drawImageUsages |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT; // copy from
+  drawImageUsages |= VK_IMAGE_USAGE_TRANSFER_DST_BIT; // copy to
+  drawImageUsages |= VK_IMAGE_USAGE_STORAGE_BIT; // compute shader can write to it
+  drawImageUsages |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT; // can be used with render pipeline to draw into
+
+  VkImageCreateInfo rimg_info = vkutil::image_create_info(_draw_image.image_format, drawImageUsages, draw_image_extent);
+
+  // for the draw image, we want to allocate it from gpu local memory
+  VmaAllocationCreateInfo rimg_allocinfo = {};
+  rimg_allocinfo.usage = VMA_MEMORY_USAGE_GPU_ONLY; // GPU image, no access from CPU. Allocated in GPU vram
+  rimg_allocinfo.requiredFlags = VkMemoryPropertyFlags(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+  // allocate and create the image
+  vmaCreateImage(_allocator, &rimg_info, &rimg_allocinfo, &_draw_image.image, &_draw_image.allocation, nullptr);
+
+  // build a image-view for the draw image to use for rendering
+  VkImageViewCreateInfo rview_info = vkutil::imageview_create_info(_draw_image.image_format, _draw_image.image, VK_IMAGE_ASPECT_COLOR_BIT);
+
+  VK_CHECK(vkCreateImageView(_device, &rview_info, nullptr, &_draw_image.image_view));
+
+  // add to deletion queues
+  _main_deletion_queue.push_function([=]() {
+    vkDestroyImageView(_device, _draw_image.image_view, nullptr);
+    vmaDestroyImage(_allocator, _draw_image.image, _draw_image.allocation);
+  });
 }
 
 void gfx::VKRenderer::init_commands() {
@@ -347,4 +390,15 @@ void gfx::VKRenderer::init_sync_structures() {
     VK_CHECK(vkCreateSemaphore(_device, &semaphore_info, nullptr, &_frames[i].present_semaphore));
     VK_CHECK(vkCreateSemaphore(_device, &semaphore_info, nullptr, &_frames[i].render_semaphore));
   }
+}
+
+void gfx::VKRenderer::draw_background(VkCommandBuffer cmd) {
+  VkClearColorValue clearValue;
+  float flash = std::abs(std::sin(_frame_number / 120.f));
+  clearValue = { { 0.0f, 0.0f, flash, 1.0f } };
+
+  VkImageSubresourceRange clearRange = vkutil::image_subresource_range(VK_IMAGE_ASPECT_COLOR_BIT);
+
+  //clear image
+  vkCmdClearColorImage(cmd, _draw_image.image, VK_IMAGE_LAYOUT_GENERAL, &clearValue, 1, &clearRange);
 }

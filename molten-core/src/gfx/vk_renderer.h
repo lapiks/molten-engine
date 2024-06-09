@@ -8,7 +8,8 @@
 
 namespace gfx {
 
-  constexpr unsigned int FRAME_OVERLAP = 2;
+  constexpr uint32_t FRAME_OVERLAP = 2;
+  constexpr uint32_t MAX_IMAGES = 4096;
 
   class VKRenderer {
   public:
@@ -48,7 +49,7 @@ namespace gfx {
       DeletionQueue deletion_queue;
     };
 
-    struct AllocatedImage {
+    struct VKImage {
       VkImage image;
       VkImageView image_view;
       VmaAllocation allocation;
@@ -73,8 +74,12 @@ namespace gfx {
     FrameData& get_current_frame() { return _frames[_frame_number % FRAME_OVERLAP]; };
 
   private:
+    // some init functions to break initialisation in several parts
+    void init_swapchain(SDL_Window* window);
     void init_commands();
     void init_sync_structures();
+
+    void draw_background(VkCommandBuffer cmd);
 
     VkInstance _instance;
     VkDebugUtilsMessengerEXT _debug_messenger;
@@ -87,7 +92,7 @@ namespace gfx {
     uint32_t _graphics_queue_family;
     VmaAllocator _allocator;
 
-    AllocatedImage _draw_image;
+    VKImage _draw_image;
     VkExtent2D _draw_extent;
 
     DeletionQueue _main_deletion_queue;
