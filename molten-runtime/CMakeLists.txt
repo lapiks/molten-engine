@@ -1,7 +1,6 @@
 add_executable(MoltenRuntime "src/main.cpp" )
 
-target_link_libraries(MoltenRuntime PRIVATE SDL2::SDL2)
-target_link_libraries(MoltenRuntime PRIVATE MoltenCore)
+target_link_libraries(MoltenRuntime PRIVATE MoltenCore SDL2::SDL2)
 
 set_target_properties(MoltenRuntime PROPERTIES
     CXX_STANDARD 20

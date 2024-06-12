@@ -1,16 +1,16 @@
-add_executable(MoltenGfxTest "gl_renderer.cpp" "gl_renderer.h" "vk_renderer.cpp" "vk_renderer.h" "vk_utils.h" "gl_utils.h" "renderer.cpp" "renderer.h" "main.cpp" "vk_utils.cpp")
+add_library(MoltenGfx "gl_renderer.cpp" "gl_renderer.h" "vk_renderer.cpp" "vk_renderer.h" "vk_utils.h" "gl_utils.h" "renderer.cpp" "../../include/renderer.h"  "vk_utils.cpp")
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
 find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{VULKAN_SDK}/Bin/ $ENV{VULKAN_SDK}/Bin32/)
 
-target_link_libraries(MoltenGfxTest PRIVATE SDL2::SDL2 vkbootstrap Glad Vulkan::Vulkan)
-target_include_directories(MoltenGfxTest PUBLIC ${Vulkan_INCLUDE_DIR})
-target_include_directories(MoltenGfxTest PUBLIC ${CMAKE_SOURCE_DIR}/third_party/vk-bootstrap/src)
-target_include_directories(MoltenGfxTest PUBLIC ${CMAKE_SOURCE_DIR}/third_party/glad/include)
-target_include_directories(MoltenGfxTest PUBLIC ${CMAKE_SOURCE_DIR}/third_party/VulkanMemoryAllocator-3.1.0/include)
-target_include_directories(MoltenGfxTest PUBLIC ${CMAKE_SOURCE_DIR}/third_party/glm-1.0)
+target_link_libraries(MoltenGfx PRIVATE vkbootstrap Glad Vulkan::Vulkan SDL2::SDL2)
+target_include_directories(MoltenGfx PUBLIC ${Vulkan_INCLUDE_DIR})
+target_include_directories(MoltenGfx PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
+target_include_directories(MoltenGfx PUBLIC ${CMAKE_SOURCE_DIR}/third_party/vk-bootstrap/src)
+target_include_directories(MoltenGfx PUBLIC ${CMAKE_SOURCE_DIR}/third_party/glad/include)
+target_include_directories(MoltenGfx PUBLIC ${CMAKE_SOURCE_DIR}/third_party/VulkanMemoryAllocator-3.1.0/include)
 
-set_target_properties(MoltenGfxTest PROPERTIES
+set_target_properties(MoltenGfx PROPERTIES
     CXX_STANDARD 20
     CXX_EXTENSIONS OFF
     COMPILE_WARNING_AS_ERROR ON
@@ -18,8 +18,8 @@ set_target_properties(MoltenGfxTest PROPERTIES
 
 if (WIN32)
     add_custom_command(
-        TARGET MoltenGfxTest POST_BUILD
-        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:SDL2::SDL2>" "$<TARGET_FILE_DIR:MoltenGfxTest>"
+        TARGET MoltenGfx POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:SDL2::SDL2>" "$<TARGET_FILE_DIR:MoltenGfx>"
         VERBATIM
     )
 endif()

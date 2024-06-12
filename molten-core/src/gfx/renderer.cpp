@@ -1,5 +1,5 @@
-#include "renderer.h"
 #pragma once
+#include "renderer.h"
 
 #include "gl_renderer.h"
 #include "vk_renderer.h"

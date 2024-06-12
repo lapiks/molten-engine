@@ -1,25 +1,12 @@
 add_executable(MoltenEditor "src/main.cpp" )
 
-find_package(Vulkan REQUIRED)
-find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{VULKAN_SDK}/Bin/ $ENV{VULKAN_SDK}/Bin32/)
+target_link_libraries(MoltenEditor PRIVATE MoltenCore SDL2::SDL2)
 
-target_link_libraries(MoltenEditor PRIVATE SDL2::SDL2)
-target_link_libraries(MoltenEditor PRIVATE MoltenCore)
-
-add_library(imgui STATIC)
-target_include_directories(imgui PUBLIC ${CMAKE_SOURCE_DIR}/third_party/imgui-1.90.7)
-target_sources(imgui PRIVATE 
-  ${CMAKE_SOURCE_DIR}/third_party/imgui-1.90.7/imgui.h
-  ${CMAKE_SOURCE_DIR}/third_party/imgui-1.90.7/imgui.cpp
-  ${CMAKE_SOURCE_DIR}/third_party/imgui-1.90.7/imgui_demo.cpp
-  ${CMAKE_SOURCE_DIR}/third_party/imgui-1.90.7/imgui_draw.cpp
-  ${CMAKE_SOURCE_DIR}/third_party/imgui-1.90.7/imgui_widgets.cpp
-  ${CMAKE_SOURCE_DIR}/third_party/imgui-1.90.7/imgui_tables.cpp
-  ${CMAKE_SOURCE_DIR}/third_party/imgui-1.90.7/backends/imgui_impl_opengl3.cpp
-  ${CMAKE_SOURCE_DIR}/third_party/imgui-1.90.7/backends/imgui_impl_vulkan.cpp
-  ${CMAKE_SOURCE_DIR}/third_party/imgui-1.90.7/backends/imgui_impl_sdl2.cpp
+set_target_properties(MoltenEditor PROPERTIES
+    CXX_STANDARD 20
+    CXX_EXTENSIONS OFF
+    COMPILE_WARNING_AS_ERROR ON
 )
-target_link_libraries(imgui PUBLIC Vulkan::Vulkan SDL2::SDL2)
 
 if (WIN32)
     add_custom_command(
