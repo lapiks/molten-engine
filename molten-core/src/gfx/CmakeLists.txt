@@ -8,6 +8,7 @@ target_include_directories(MoltenGfxTest PUBLIC ${Vulkan_INCLUDE_DIR})
 target_include_directories(MoltenGfxTest PUBLIC ${CMAKE_SOURCE_DIR}/third_party/vk-bootstrap/src)
 target_include_directories(MoltenGfxTest PUBLIC ${CMAKE_SOURCE_DIR}/third_party/glad/include)
 target_include_directories(MoltenGfxTest PUBLIC ${CMAKE_SOURCE_DIR}/third_party/VulkanMemoryAllocator-3.1.0/include)
+target_include_directories(MoltenGfxTest PUBLIC ${CMAKE_SOURCE_DIR}/third_party/glm-1.0)
 
 set_target_properties(MoltenGfxTest PROPERTIES
     CXX_STANDARD 20

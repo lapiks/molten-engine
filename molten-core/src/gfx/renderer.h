@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <vector>
 
 #define GFX_USE_OPENGL
 //#define GFX_USE_VULKAN
@@ -57,6 +58,16 @@ namespace gfx {
     NONE,
     UINT16,
     UINT32,
+  };
+
+  enum class UniformType {
+    FLOAT,
+    FLOAT2,
+    FLOAT3,
+    FLOAT4,
+    MAT2,
+    MAT3,
+    MAT4,
   };
 
   enum class Action {
@@ -126,6 +137,15 @@ namespace gfx {
     VertexAttribute attributes[MAX_ATTRIBUTES];
   };
 
+  struct UniformDesc {
+    const char* name;
+    UniformType type;
+  };
+
+  struct UniformBlockLayout {
+    std::vector<UniformDesc> uniforms;
+  };
+
   // OBJECT CREATION STRUCTS
   struct BufferDesc {
     Memory mem;
@@ -143,6 +163,7 @@ namespace gfx {
   struct ShaderDesc {
     const char* vertex_src = nullptr;
     const char* fragment_src = nullptr;
+    UniformBlockLayout uniforms_layout;
   };
 
   struct PipelineDesc {

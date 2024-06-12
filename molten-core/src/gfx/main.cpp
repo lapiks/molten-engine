@@ -5,10 +5,47 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 
+#include <glm/glm.hpp>
+
 #include "renderer.h"
 
 #define USE_OPENGL
 //#define USE_VULKAN
+
+struct BasicShader {
+  static inline const char* VERTEX = "#version 330 core\n"
+    "layout (location = 0) in vec3 aPos;\n"
+    "void main()\n"
+    "{\n"
+    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "}\0";
+
+  static inline const char* FRAGMENT = "#version 330 core\n"
+    "out vec4 FragColor;\n"
+    "void main()\n"
+    "{\n"
+    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "}\n\0";
+
+  struct Uniforms {
+    glm::mat4 mvp;
+  };
+
+  static gfx::ShaderDesc desc() {
+    return gfx::ShaderDesc{
+      .vertex_src = VERTEX,
+      .fragment_src = FRAGMENT,
+      .uniforms_layout = gfx::UniformBlockLayout {
+        .uniforms = {
+          gfx::UniformDesc {
+            .name = "MVP",
+            .type = gfx::UniformType::MAT4,
+          }
+        },
+      }
+    };
+  }
+};
 
 int main(int, char**) {
   SDL_SetMainReady();
@@ -53,26 +90,7 @@ int main(int, char**) {
   gfx::Renderer renderer;
   renderer.init(gfx::InitInfo{ window });
 
-  const char* vs_src = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-
-  const char* fs_src = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n\0";
-
-  gfx::Shader shader = renderer.new_shader(
-    gfx::ShaderDesc{
-      vs_src,
-      fs_src,
-    }
-    );
+  gfx::Shader shader = renderer.new_shader(BasicShader::desc());
 
   float vertices[] = {
     -0.5f, -0.5f, 0.0f, // left  
@@ -154,7 +172,10 @@ int main(int, char**) {
     renderer.set_bindings(bind);
     renderer.set_viewport({ 0, 0, 500, 500 });
     renderer.set_scissor({ 0, 0, 500, 500 });
-    //renderer.apply_uniforms(uniforms);
+    BasicShader::Uniforms uniforms{
+      .mvp = glm::mat4(1.0),
+    };
+    renderer.set_uniforms(gfx::ShaderStage::VERTEX, gfx::MAKE_MEMORY(uniforms));
     renderer.draw(0, 3, 1);
 
     SDL_GL_SwapWindow(window);
