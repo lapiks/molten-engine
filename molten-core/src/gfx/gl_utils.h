@@ -33,6 +33,7 @@ namespace gfx {
     switch (format) {
     case AttributeFormat::FLOAT2: return GL_FLOAT;
     case AttributeFormat::FLOAT3: return GL_FLOAT;
+    case AttributeFormat::FLOAT4: return GL_FLOAT;
     }
     return GL_NONE;
   }
@@ -41,13 +42,14 @@ namespace gfx {
     switch (format) {
     case AttributeFormat::FLOAT2: return 2;
     case AttributeFormat::FLOAT3: return 3;
+    case AttributeFormat::FLOAT4: return 4;
     }
     return 0;
   }
 
   uint32_t get_gl_type_size(GLenum type) {
     switch (type) {
-    case GL_FLOAT: return 32;
+    case GL_FLOAT: return 4;
     }
     return 0;
   }
@@ -60,7 +62,16 @@ namespace gfx {
     return GL_NONE;
   }
 
-  uint16_t gl_size_of_type(UniformType type) {
+  GLenum get_gl_index_type(IndexType type) {
+    switch (type) {
+    case IndexType::NONE: return GL_NONE;
+    case IndexType::UINT16: return GL_UNSIGNED_SHORT;
+    case IndexType::UINT32: return GL_UNSIGNED_INT;
+    }
+    return GL_NONE;
+  }
+
+  uint16_t get_gl_uniform_type_size(UniformType type) {
     switch (type) {
     case UniformType::FLOAT: return 4;
     case UniformType::FLOAT2: return 8;

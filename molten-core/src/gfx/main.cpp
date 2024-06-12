@@ -5,7 +5,10 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "renderer.h"
 
@@ -15,17 +18,22 @@
 struct BasicShader {
   static inline const char* VERTEX = "#version 330 core\n"
     "layout (location = 0) in vec3 a_pos;\n"
+    "layout (location = 1) in vec4 a_color;\n"
+    "layout (location = 2) in vec2 a_uv;\n"
     "uniform mat4 u_mvp;\n"
+    "out vec4 io_color;\n"
     "void main()\n"
     "{\n"
+    "   io_color = a_color;\n"
     "   gl_Position = u_mvp * vec4(a_pos, 1.0);\n"
     "}\0";
 
   static inline const char* FRAGMENT = "#version 330 core\n"
+    "in vec4 io_color;\n"
     "out vec4 FragColor;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "   FragColor = io_color;\n"
     "}\n\0";
 
   struct Uniforms {
@@ -94,9 +102,36 @@ int main(int, char**) {
   gfx::Shader shader = renderer.new_shader(BasicShader::desc());
 
   float vertices[] = {
-    -0.5f, -0.5f, 0.0f, // left  
-     0.5f, -0.5f, 0.0f, // right 
-     0.0f,  0.5f, 0.0f  // top   
+    /* pos               color                   uvs */
+    -1.0, -1.0, -1.0,    1.0, 0.5, 0.5, 1.0,     0.0, 0.0,
+     1.0, -1.0, -1.0,    1.0, 0.5, 0.5, 1.0,     1.0, 0.0,
+     1.0,  1.0, -1.0,    1.0, 0.5, 0.5, 1.0,     1.0, 1.0,
+    -1.0,  1.0, -1.0,    1.0, 0.5, 0.5, 1.0,     0.0, 1.0,
+ 
+    -1.0, -1.0,  1.0,    0.5, 1.0, 0.5, 1.0,     0.0, 0.0,
+     1.0, -1.0,  1.0,    0.5, 1.0, 0.5, 1.0,     1.0, 0.0,
+     1.0,  1.0,  1.0,    0.5, 1.0, 0.5, 1.0,     1.0, 1.0,
+    -1.0,  1.0,  1.0,    0.5, 1.0, 0.5, 1.0,     0.0, 1.0,
+ 
+    -1.0, -1.0, -1.0,    0.5, 0.5, 1.0, 1.0,     0.0, 0.0,
+    -1.0,  1.0, -1.0,    0.5, 0.5, 1.0, 1.0,     1.0, 0.0,
+    -1.0,  1.0,  1.0,    0.5, 0.5, 1.0, 1.0,     1.0, 1.0,
+    -1.0, -1.0,  1.0,    0.5, 0.5, 1.0, 1.0,     0.0, 1.0,
+ 
+     1.0, -1.0, -1.0,    1.0, 0.5, 0.0, 1.0,     0.0, 0.0,
+     1.0,  1.0, -1.0,    1.0, 0.5, 0.0, 1.0,     1.0, 0.0,
+     1.0,  1.0,  1.0,    1.0, 0.5, 0.0, 1.0,     1.0, 1.0,
+     1.0, -1.0,  1.0,    1.0, 0.5, 0.0, 1.0,     0.0, 1.0,
+ 
+    -1.0, -1.0, -1.0,    0.0, 0.5, 1.0, 1.0,     0.0, 0.0,
+    -1.0, -1.0,  1.0,    0.0, 0.5, 1.0, 1.0,     1.0, 0.0,
+     1.0, -1.0,  1.0,    0.0, 0.5, 1.0, 1.0,     1.0, 1.0,
+     1.0, -1.0, -1.0,    0.0, 0.5, 1.0, 1.0,     0.0, 1.0,
+ 
+    -1.0,  1.0, -1.0,    1.0, 0.0, 0.5, 1.0,     0.0, 0.0,
+    -1.0,  1.0,  1.0,    1.0, 0.0, 0.5, 1.0,     1.0, 0.0,
+     1.0,  1.0,  1.0,    1.0, 0.0, 0.5, 1.0,     1.0, 1.0,
+     1.0,  1.0, -1.0,    1.0, 0.0, 0.5, 1.0,     0.0, 1.0
   };
 
   gfx::Buffer vbuffer = renderer.new_buffer(
@@ -107,7 +142,12 @@ int main(int, char**) {
     );
 
   uint16_t indices[] = {
-    1, 2, 3
+    0, 1, 2,  0, 2, 3,
+    6, 5, 4,  7, 6, 4,
+    8, 9, 10,  8, 10, 11,
+    14, 13, 12,  15, 14, 12,
+    16, 17, 18,  16, 18, 19,
+    22, 21, 20,  23, 22, 20
   };
 
   gfx::Buffer ibuffer = renderer.new_buffer(
@@ -119,6 +159,8 @@ int main(int, char**) {
 
   gfx::VertexLayout layout;
   layout.attributes[0].format = gfx::AttributeFormat::FLOAT3;
+  layout.attributes[1].format = gfx::AttributeFormat::FLOAT4;
+  layout.attributes[2].format = gfx::AttributeFormat::FLOAT2;
 
   gfx::Pipeline pipe = renderer.new_pipeline(
     gfx::PipelineDesc{
@@ -131,6 +173,8 @@ int main(int, char**) {
   gfx::Bindings bind;
   bind.vertex_buffers[0] = vbuffer;
   bind.index_buffer = ibuffer;
+
+  glm::vec2 rotation = glm::vec2(0);
 
   bool should_close = false;
   bool stop_rendering = false;
@@ -162,6 +206,21 @@ int main(int, char**) {
       continue;
     }
 
+    rotation.x += 0.01f;
+    rotation.y += 0.03f;
+    glm::mat4 model = glm::eulerAngleY(rotation.y) * glm::eulerAngleX(rotation.x);
+
+    glm::mat4 proj = glm::perspective(glm::radians(60.0f), 1024.0f / 680.0f, 0.01f, 10.0f);
+    glm::mat4 view = glm::lookAt(
+      glm::vec3(0.0f, 1.5f, 3.0f),
+      glm::vec3(0.0f, 0.0f, 0.0f),
+      glm::vec3(0.0f, 1.0f, 0.0f)
+    );
+
+    BasicShader::Uniforms uniforms{
+      .mvp = proj * view * model,
+    };
+
     renderer.begin_default_pass(
       gfx::PassAction{
         gfx::ColorAction {
@@ -171,13 +230,8 @@ int main(int, char**) {
     );
     renderer.set_pipeline(pipe);
     renderer.set_bindings(bind);
-    renderer.set_viewport({ 0, 0, 500, 500 });
-    renderer.set_scissor({ 0, 0, 500, 500 });
-    BasicShader::Uniforms uniforms{
-      .mvp = glm::mat4(1.0),
-    };
     renderer.set_uniforms(gfx::ShaderStage::VERTEX, gfx::MAKE_MEMORY(uniforms));
-    renderer.draw(0, 3, 1);
+    renderer.draw(0, 36, 1);
 
 #ifdef USE_OPENGL
     SDL_GL_SwapWindow(window);

@@ -101,7 +101,7 @@ namespace gfx {
         .type = uniform_desc.type,
         .offset = offset,
       };
-      offset += gl_size_of_type(uniform_desc.type);
+      offset += get_gl_uniform_type_size(uniform_desc.type);
     }
   }
 
@@ -160,13 +160,15 @@ namespace gfx {
   void GLRenderer::set_bindings(Bindings bind) {
     // todo manage multiple VBO?
     _state.vertex_buffer = &_buffers[bind.vertex_buffers[0]];
+    _state.index_buffer = &_buffers[bind.index_buffer];
 
     glBindBuffer(GL_VERTEX_ARRAY, _state.vertex_buffer->id);
     for (int i = 0; i < MAX_ATTRIBUTES; i++) {
       const GLVertexAttribute& attr = _state.pipeline->attributes[i];
-      glVertexAttribPointer(i, attr.size, attr.type, GL_FALSE, attr.stride, (void*)0);
+      glVertexAttribPointer(i, attr.size, attr.type, GL_FALSE, (GLsizei)attr.stride, (const GLvoid*)attr.offset);
       glEnableVertexAttribArray(i);
     }
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _state.index_buffer->id);
   }
 
   void GLRenderer::set_uniforms(ShaderStage stage, const Memory& mem) {
@@ -210,9 +212,17 @@ namespace gfx {
 
   void GLRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances) {
     GLenum primitive = get_gl_primitive_type(_state.pipeline->pipeline_common.primitive_type);
+    GLenum i_type = _state.pipeline->index_type;
 
-    if (num_instances > 0)
-      glDrawArrays(primitive, first_element, num_elements);
+    if (num_instances > 0) {
+      if (i_type == GL_NONE) {
+        glDrawArrays(primitive, first_element, num_elements);
+      }
+      else {
+        glDrawElements(primitive, num_elements, i_type, (const GLvoid*)0);
+      }
+    }
+     
   }
 
   void GLRenderer::set_viewport(const Rect& rect) {
@@ -251,13 +261,22 @@ namespace gfx {
   bool GLRenderer::new_pipeline(Pipeline h, const PipelineDesc& desc) {
     GLPipeline& pipe = _pipelines[h];
     pipe.shader = _shaders[desc.shader];
+    pipe.index_type = get_gl_index_type(desc.index_type);
 
+    size_t offset = 0;
     for (int i = 0; i < MAX_ATTRIBUTES; i++) {
       const VertexAttribute& attr = desc.layout.attributes[i];
       GLVertexAttribute& gl_attr = pipe.attributes[i];
       gl_attr.type = get_gl_attribute_type(attr.format);
       gl_attr.size = get_gl_attribute_size(attr.format);
-      gl_attr.stride = get_gl_type_size(gl_attr.type * gl_attr.size);
+      gl_attr.offset = offset;
+      offset += get_gl_type_size(gl_attr.type) * gl_attr.size;
+    }
+
+    for (int i = 0; i < MAX_ATTRIBUTES; i++) {
+      const VertexAttribute& attr = desc.layout.attributes[i];
+      GLVertexAttribute& gl_attr = pipe.attributes[i];
+      gl_attr.stride = offset;
     }
 
     return true;

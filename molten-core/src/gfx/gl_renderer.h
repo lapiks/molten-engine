@@ -45,16 +45,18 @@ namespace gfx {
   };
 
   struct GLVertexAttribute {
-    uint32_t index;
-    int32_t size;
+    GLuint index;
+    GLint size;
     GLenum type;
-    int32_t stride;
+    size_t stride;
+    size_t offset;
   };
 
   struct GLPipeline {
     PipelineCommon pipeline_common;
     GLShader shader;
     GLVertexAttribute attributes[MAX_ATTRIBUTES];
+    GLenum index_type;
   };
 
   class GLRenderer {
@@ -84,6 +86,7 @@ namespace gfx {
     struct GLState {
       GLPipeline* pipeline;
       GLBuffer* vertex_buffer;
+      GLBuffer* index_buffer;
       GLuint global_vao;
       GLuint default_framebuffer;
     };

@@ -47,6 +47,7 @@ namespace gfx {
   enum class AttributeFormat {
     FLOAT2,
     FLOAT3,
+    FLOAT4,
   };
 
   enum class BufferType {
@@ -128,9 +129,9 @@ namespace gfx {
   };
 
   struct VertexAttribute {
-    int32_t index = 0;
-    size_t stride = 0;
-    AttributeFormat format = AttributeFormat::FLOAT3;
+    int32_t index;
+    size_t stride;
+    AttributeFormat format;
   };
 
   struct VertexLayout {
