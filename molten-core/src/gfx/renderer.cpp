@@ -27,6 +27,14 @@ namespace gfx {
     ctx.draw(first_element, num_elements, num_instances);
   }
 
+  void Renderer::set_viewport(const Rect& rect) {
+    ctx.set_viewport(rect);
+  }
+
+  void Renderer::set_scissor(const Rect& rect) {
+    ctx.set_scissor(rect);
+  }
+
   void Renderer::begin_pass(Pass pass, const PassAction& action) {
     PassData& pass_data = _passes[pass];
     ctx.begin_pass(&pass_data, action);

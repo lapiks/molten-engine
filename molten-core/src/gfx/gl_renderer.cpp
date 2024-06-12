@@ -55,6 +55,7 @@ namespace gfx {
     if (!success) {
       glGetShaderInfoLog(vs, 512, NULL, infoLog);
       std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+      glDeleteShader(vs);
       return;
     }
 
@@ -66,6 +67,8 @@ namespace gfx {
     if (!success) {
       glGetShaderInfoLog(fs, 512, NULL, infoLog);
       std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+      glDeleteShader(fs);
+      glDeleteShader(fs);
       return;
     }
 
@@ -79,6 +82,9 @@ namespace gfx {
     if (!success) {
       glGetProgramInfoLog(id, 512, NULL, infoLog);
       std::cout << "ERROR::SHADER::LINK_FAILED\n" << infoLog << std::endl;
+      glDeleteShader(fs);
+      glDeleteShader(fs);
+      glDeleteProgram(id);
       return;
     }
 
@@ -160,6 +166,14 @@ namespace gfx {
 
     if (num_instances > 0)
       glDrawArrays(primitive, first_element, num_elements);
+  }
+
+  void GLRenderer::set_viewport(const Rect& rect) {
+    glViewport(rect.x, rect.y, rect.width, rect.height);
+  }
+
+  void GLRenderer::set_scissor(const Rect& rect) {
+    glScissor(rect.x, rect.y, rect.width, rect.height);
   }
 
   bool GLRenderer::new_buffer(Buffer h, const BufferDesc& desc) {

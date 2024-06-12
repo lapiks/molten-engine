@@ -40,7 +40,6 @@ namespace gfx {
     };
 
     struct FrameData {
-
       VkCommandPool command_pool;
       VkCommandBuffer main_command_buffer;
       VkSemaphore present_semaphore; // render commands wait on the swapchain image request
@@ -64,6 +63,8 @@ namespace gfx {
     void set_bindings(Bindings bind);
     void set_uniforms(ShaderStage stage, const Memory& mem);
     void draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances);
+    void set_viewport(const Rect& rect);
+    void set_scissor(const Rect& rect);
 
     bool new_buffer(Buffer h, const BufferDesc& desc);
     bool new_texture(Texture h, const TextureDesc& desc);

@@ -131,7 +131,7 @@ int main(int, char**) {
           stop_rendering = false;
         }
       }
-                          break;
+      break;
 
       default:
         break;
@@ -139,7 +139,6 @@ int main(int, char**) {
     }
 
     if (stop_rendering) {
-      // throttle the speed to avoid the endless spinning
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
       continue;
     }
@@ -153,6 +152,8 @@ int main(int, char**) {
     );
     renderer.set_pipeline(pipe);
     renderer.set_bindings(bind);
+    renderer.set_viewport({ 0, 0, 500, 500 });
+    renderer.set_scissor({ 0, 0, 500, 500 });
     //renderer.apply_uniforms(uniforms);
     renderer.draw(0, 3, 1);
 

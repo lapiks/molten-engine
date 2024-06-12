@@ -250,23 +250,36 @@ void gfx::VKRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32
   _frame_number++;
 }
 
+void gfx::VKRenderer::set_viewport(const Rect& rect) {
+  // todo
+}
+
+void gfx::VKRenderer::set_scissor(const Rect& rect) {
+  // todo
+}
+
 bool gfx::VKRenderer::new_buffer(Buffer h, const BufferDesc& desc) {
+  // todo
   return false;
 }
 
 bool gfx::VKRenderer::new_texture(Texture h, const TextureDesc& desc) {
+  // todo
   return false;
 }
 
 bool gfx::VKRenderer::new_shader(Shader h, const ShaderDesc& desc) {
+  // todo
   return false;
 }
 
 bool gfx::VKRenderer::new_pass(Pass h) {
+  // todo
   return false;
 }
 
 bool gfx::VKRenderer::new_pipeline(Pipeline h, const PipelineDesc& desc) {
+  // todo
   return false;
 }
 
