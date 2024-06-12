@@ -2,8 +2,8 @@
 
 #include <stdint.h>
 
-//#define GFX_USE_OPENGL
-#define GFX_USE_VULKAN
+#define GFX_USE_OPENGL
+//#define GFX_USE_VULKAN
 
 struct SDL_Window;
 

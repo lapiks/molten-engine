@@ -22,7 +22,7 @@ namespace gfx {
   }
 
   void GLRenderer::shutdown() {
-
+    glDeleteVertexArrays(1, &_state.global_vao);
   }
 
   void GLRenderer::begin_pass(PassData* pass, const PassAction& action) {
