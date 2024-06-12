@@ -12,14 +12,23 @@ namespace gfx {
   constexpr uint32_t MAX_PIPELINES = 4096;
 
   struct GLBuffer {
+    void create(const BufferDesc& desc);
+    void destroy();
+
     GLuint id;
   };
 
   struct GLTexture {
+    void create(const TextureDesc& desc);
+    void destroy();
+
     GLuint id;
   };
 
   struct GLShader {
+    void create(const ShaderDesc& desc);
+    void destroy();
+
     GLuint id;
   };
 

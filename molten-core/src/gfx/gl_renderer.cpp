@@ -7,21 +7,106 @@
 #include <SDL2/SDL.h>
 
 namespace gfx {
+  void GLBuffer::create(const BufferDesc& desc) {
+    glGenBuffers(1, &id);
+
+    GLenum gl_buffer_type = get_gl_buffer_type(desc.type);
+
+    glBindBuffer(gl_buffer_type, id);
+    glBufferData(gl_buffer_type, desc.mem.size, desc.mem.data, GL_STATIC_DRAW);
+  }
+
+  void GLBuffer::destroy() {
+    glDeleteBuffers(1, &id);
+  }
+
+  void GLTexture::create(const TextureDesc& desc) {
+    glGenTextures(1, &id);
+
+    GLenum target = get_gl_texture_target(desc.type);
+    GLenum format = get_gl_texture_format(desc.format);
+
+    glBindTexture(target, id);
+
+    // todo: config this
+    glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // todo: config data type
+    glTexImage2D(target, 0, GL_RGB, desc.width, desc.height, 0, format, GL_UNSIGNED_BYTE, desc.mem.data);
+    glGenerateMipmap(target);
+  }
+
+  void GLTexture::destroy() {
+    glDeleteTextures(1, &id);
+  }
+
+  void GLShader::create(const ShaderDesc& desc) {
+    // create shaders + compile
+    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vs, 1, &desc.vertex_src, NULL);
+    glCompileShader(vs);
+
+    int  success;
+    char infoLog[512];
+    glGetShaderiv(vs, GL_COMPILE_STATUS, &success);
+    if (!success) {
+      glGetShaderInfoLog(vs, 512, NULL, infoLog);
+      std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+      return;
+    }
+
+    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fs, 1, &desc.fragment_src, NULL);
+    glCompileShader(fs);
+
+    glGetShaderiv(fs, GL_COMPILE_STATUS, &success);
+    if (!success) {
+      glGetShaderInfoLog(fs, 512, NULL, infoLog);
+      std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+      return;
+    }
+
+    // create program + attach and link
+    id = glCreateProgram();
+    glAttachShader(id, vs);
+    glAttachShader(id, fs);
+    glLinkProgram(id);
+
+    glGetProgramiv(id, GL_LINK_STATUS, &success);
+    if (!success) {
+      glGetProgramInfoLog(id, 512, NULL, infoLog);
+      std::cout << "ERROR::SHADER::LINK_FAILED\n" << infoLog << std::endl;
+      return;
+    }
+
+    // delete shaders as they are already attached to the program
+    glDeleteShader(vs);
+    glDeleteShader(fs);
+  }
+
+  void GLShader::destroy() {
+
+  }
+
   void GLRenderer::init(const InitInfo& info) {
     if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
       std::cout << "Failed to initialize GLAD" << std::endl;
       return;
     }
 
-    // global vao
+    // global vao creation
     glGenVertexArrays(1, &_state.global_vao);
     glBindVertexArray(_state.global_vao);
 
-    // default framebuffer
+    // get the default framebuffer binding
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&_state.default_framebuffer);
   }
 
   void GLRenderer::shutdown() {
+    // destroys the global VAO
     glDeleteVertexArrays(1, &_state.global_vao);
   }
 
@@ -33,6 +118,7 @@ namespace gfx {
 
     }
     GLbitfield buffer_bit = 0;
+    // clear action
     if (action.color_action.action == Action::CLEAR) {
       const Color& color = action.color_action.color;
       glClearColor(color.r, color.g, color.b, color.a);
@@ -73,83 +159,26 @@ namespace gfx {
     GLenum primitive = get_gl_primitive_type(_state.pipeline->pipeline_common.primitive_type);
 
     if (num_instances > 0)
-    glDrawArrays(primitive, first_element, num_elements);
+      glDrawArrays(primitive, first_element, num_elements);
   }
 
   bool GLRenderer::new_buffer(Buffer h, const BufferDesc& desc) {
     GLBuffer& buffer = _buffers[h];
-    glGenBuffers(1, &buffer.id);
-
-    GLenum gl_buffer_type = get_gl_buffer_type(desc.type);
-
-    glBindBuffer(gl_buffer_type, buffer.id);
-    glBufferData(gl_buffer_type, desc.mem.size, desc.mem.data, GL_STATIC_DRAW);
+    buffer.create(desc);
 
     return true;
   }
 
   bool GLRenderer::new_texture(Texture h, const TextureDesc& desc) {
     GLTexture& texture = _textures[h];
-    glGenTextures(1, &texture.id);
-
-    GLenum target = get_gl_texture_target(desc.type);
-    GLenum format = get_gl_texture_format(desc.format);
-
-    glBindTexture(target, texture.id);
-
-    // todo: config this
-    glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // todo: config data type
-    glTexImage2D(target, 0, GL_RGB, desc.width, desc.height, 0, format, GL_UNSIGNED_BYTE, desc.mem.data);
-    glGenerateMipmap(target);
+    texture.create(desc);
 
     return true;
   }
 
   bool GLRenderer::new_shader(Shader h, const ShaderDesc& desc) {
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs, 1, &desc.vertex_src, NULL);
-    glCompileShader(vs);
-
-    int  success;
-    char infoLog[512];
-    glGetShaderiv(vs, GL_COMPILE_STATUS, &success);
-    if (!success) {
-      glGetShaderInfoLog(vs, 512, NULL, infoLog);
-      std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-      return false;
-    }
-
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, &desc.fragment_src, NULL);
-    glCompileShader(fs);
-
-    glGetShaderiv(fs, GL_COMPILE_STATUS, &success);
-    if (!success) {
-      glGetShaderInfoLog(fs, 512, NULL, infoLog);
-      std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-      return false;
-    }
-
     GLShader& shader = _shaders[h];
-    shader.id = glCreateProgram();
-    glAttachShader(shader.id, vs);
-    glAttachShader(shader.id, fs);
-    glLinkProgram(shader.id);
-
-    glGetProgramiv(shader.id, GL_LINK_STATUS, &success);
-    if (!success) {
-      glGetProgramInfoLog(shader.id, 512, NULL, infoLog);
-      std::cout << "ERROR::SHADER::LINK_FAILED\n" << infoLog << std::endl;
-      return false;
-    }
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
+    shader.create(desc);
 
     return true;
   }
