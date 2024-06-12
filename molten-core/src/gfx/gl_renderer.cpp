@@ -93,14 +93,15 @@ namespace gfx {
     glDeleteShader(fs);
 
     int uniform_idx = 0;
+    uint16_t offset = 0;
     for (const UniformDesc& uniform_desc : desc.uniforms_layout.uniforms) {
       GLint loc = glGetUniformLocation(id, uniform_desc.name);
-      uint16_t offset = gl_size_of_type(uniform_desc.type);
       uniforms_layout.uniforms[uniform_idx++] = GLUniform{
         .loc = loc,
         .type = uniform_desc.type,
         .offset = offset,
       };
+      offset += gl_size_of_type(uniform_desc.type);
     }
   }
 

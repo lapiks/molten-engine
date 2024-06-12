@@ -14,10 +14,11 @@
 
 struct BasicShader {
   static inline const char* VERTEX = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
+    "layout (location = 0) in vec3 a_pos;\n"
+    "uniform mat4 u_mvp;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   gl_Position = u_mvp * vec4(a_pos, 1.0);\n"
     "}\0";
 
   static inline const char* FRAGMENT = "#version 330 core\n"
@@ -38,7 +39,7 @@ struct BasicShader {
       .uniforms_layout = gfx::UniformBlockLayout {
         .uniforms = {
           gfx::UniformDesc {
-            .name = "MVP",
+            .name = "u_mvp",
             .type = gfx::UniformType::MAT4,
           }
         },
