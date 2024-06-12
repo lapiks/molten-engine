@@ -91,10 +91,21 @@ namespace gfx {
     // delete shaders as they are already attached to the program
     glDeleteShader(vs);
     glDeleteShader(fs);
+
+    int uniform_idx = 0;
+    for (const UniformDesc& uniform_desc : desc.uniforms_layout.uniforms) {
+      GLint loc = glGetUniformLocation(id, uniform_desc.name);
+      uint16_t offset = gl_size_of_type(uniform_desc.type);
+      uniforms_layout.uniforms[uniform_idx++] = GLUniform{
+        .loc = loc,
+        .type = uniform_desc.type,
+        .offset = offset,
+      };
+    }
   }
 
   void GLShader::destroy() {
-
+    glDeleteProgram(id);
   }
 
   void GLRenderer::init(const InitInfo& info) {
@@ -158,7 +169,42 @@ namespace gfx {
   }
 
   void GLRenderer::set_uniforms(ShaderStage stage, const Memory& mem) {
+     const GLUniformBlockLayout& uniform_layout = _state.pipeline->shader.uniforms_layout;
 
+     for (const GLUniform& gl_uniform : uniform_layout.uniforms) {
+       GLfloat* float_ptr = (GLfloat*)((uint8_t*)mem.data + gl_uniform.offset);
+       switch (gl_uniform.type) {
+         using enum UniformType;
+         case FLOAT:{
+           glUniform1fv(gl_uniform.loc, 1, float_ptr);
+         }
+         break;
+         case FLOAT2: {
+           glUniform2fv(gl_uniform.loc, 1, float_ptr);
+         }
+         break;
+         case FLOAT3: {
+           glUniform3fv(gl_uniform.loc, 1, float_ptr);
+         }
+         break;
+         case FLOAT4: {
+           glUniform4fv(gl_uniform.loc, 1, float_ptr);
+         }
+         break;
+         case MAT2: {
+           glUniformMatrix2fv(gl_uniform.loc, 1, false, float_ptr);
+         }
+         break;
+         case MAT3: {
+           glUniformMatrix3fv(gl_uniform.loc, 1, false, float_ptr);
+         }
+         break;
+         case MAT4: {
+           glUniformMatrix4fv(gl_uniform.loc, 1, false, float_ptr);
+         }
+         break;
+       }
+     }
   }
 
   void GLRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances) {

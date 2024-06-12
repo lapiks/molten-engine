@@ -10,6 +10,7 @@ namespace gfx {
   constexpr uint32_t MAX_TEXTURES = 4096;
   constexpr uint32_t MAX_SHADERS = 4096;
   constexpr uint32_t MAX_PIPELINES = 4096;
+  constexpr uint8_t MAX_UNIFORMS = 16;
 
   struct GLBuffer {
     void create(const BufferDesc& desc);
@@ -25,10 +26,21 @@ namespace gfx {
     GLuint id;
   };
 
+  struct GLUniform {
+    GLint loc;
+    UniformType type;
+    uint16_t offset;
+  };
+
+  struct GLUniformBlockLayout {
+    std::array<GLUniform, MAX_UNIFORMS> uniforms;
+  };
+
   struct GLShader {
     void create(const ShaderDesc& desc);
     void destroy();
 
+    GLUniformBlockLayout uniforms_layout;
     GLuint id;
   };
 

@@ -59,5 +59,18 @@ namespace gfx {
     }
     return GL_NONE;
   }
+
+  uint16_t gl_size_of_type(UniformType type) {
+    switch (type) {
+    case UniformType::FLOAT: return 4;
+    case UniformType::FLOAT2: return 8;
+    case UniformType::FLOAT3: return 12;
+    case UniformType::FLOAT4: return 16;
+    case UniformType::MAT2: return 16;
+    case UniformType::MAT3: return 36;
+    case UniformType::MAT4: return 64;
+    }
+    return 0;
+  }
 }
 

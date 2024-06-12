@@ -178,7 +178,9 @@ int main(int, char**) {
     renderer.set_uniforms(gfx::ShaderStage::VERTEX, gfx::MAKE_MEMORY(uniforms));
     renderer.draw(0, 3, 1);
 
+#ifdef USE_OPENGL
     SDL_GL_SwapWindow(window);
+#endif
   }
 
   renderer.shutdown();
