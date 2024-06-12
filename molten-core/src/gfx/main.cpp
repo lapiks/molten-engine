@@ -63,6 +63,9 @@ int main(int, char**) {
     return 1;
   }
 
+  int window_width = 1024;
+  int window_height = 680;
+
 #ifdef USE_OPENGL
   int windowFlags = SDL_WINDOW_OPENGL;
 #else 
@@ -72,8 +75,8 @@ int main(int, char**) {
     "Molten Engine", 
     SDL_WINDOWPOS_UNDEFINED, 
     SDL_WINDOWPOS_UNDEFINED, 
-    1024, 
-    680, 
+    window_width,
+    window_height,
     windowFlags
   );
   if (!window) {
@@ -210,7 +213,7 @@ int main(int, char**) {
     rotation.y += 0.03f;
     glm::mat4 model = glm::eulerAngleY(rotation.y) * glm::eulerAngleX(rotation.x);
 
-    glm::mat4 proj = glm::perspective(glm::radians(60.0f), 1024.0f / 680.0f, 0.01f, 10.0f);
+    glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)window_width / window_height, 0.01f, 10.0f);
     glm::mat4 view = glm::lookAt(
       glm::vec3(0.0f, 1.5f, 3.0f),
       glm::vec3(0.0f, 0.0f, 0.0f),
