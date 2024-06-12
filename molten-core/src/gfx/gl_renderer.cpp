@@ -14,6 +14,9 @@ namespace gfx {
 
     glBindBuffer(gl_buffer_type, id);
     glBufferData(gl_buffer_type, desc.mem.size, desc.mem.data, GL_STATIC_DRAW);
+
+    // init renderer state
+    glEnable(GL_DEPTH_TEST);
   }
 
   void GLBuffer::destroy() {
