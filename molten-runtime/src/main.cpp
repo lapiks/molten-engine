@@ -189,7 +189,7 @@ int main(int, char**) {
     gfx::TextureDesc{
       gfx::Memory(container_img.data),
       gfx::TextureType::TEXTURE_2D,
-      gfx::TextureFormat::RGB,
+      gfx::TextureFormat::RGB8,
       container_img.width,
       container_img.height
     }
@@ -199,17 +199,41 @@ int main(int, char**) {
     gfx::TextureDesc{
       gfx::Memory(face_img.data),
       gfx::TextureType::TEXTURE_2D,
-      gfx::TextureFormat::RGBA,
+      gfx::TextureFormat::RGBA8,
       face_img.width,
       face_img.height
     }
   );
 
-  gfx::Bindings bind{
-    .vertex_buffer = vbuffer,
-    .index_buffer = ibuffer,
-    .textures = { gfx_container, gfx_face },
+  gfx::TextureDesc target_desc{
+    .type = gfx::TextureType::TEXTURE_2D,
+    .format = gfx::TextureFormat::RGBA8,
+    .width = window_width,
+    .height = window_height,
   };
+
+  gfx::Texture color_target = renderer.new_texture(
+    target_desc
+  );
+
+  target_desc.format = gfx::TextureFormat::DEPTH;
+
+  gfx::Texture depth_target = renderer.new_texture(
+    target_desc
+  );
+
+  gfx::Bindings bind{
+  .vertex_buffer = vbuffer,
+  .index_buffer = ibuffer,
+  .textures = { color_target, gfx_face },
+  };
+
+  gfx::RenderPass offscreen_pass = renderer.new_render_pass(
+    gfx::RenderPassDesc{
+      .colors = { color_target },
+      .depth = depth_target,
+    }
+  );
 
   glm::vec2 rotation = glm::vec2(0);
 
@@ -263,10 +287,21 @@ int main(int, char**) {
       .mvp = proj * view * model,
     };
 
-    renderer.begin_default_pass(
+    renderer.begin_render_pass(
+      offscreen_pass,
       gfx::PassAction{
         gfx::ColorAction {
-          .color = gfx::Color(0.5, 0.0, 0.0, 0.0)
+          .color = gfx::Color(0.0, 0.0, 1.0, 1.0),
+        }
+      }
+    );
+
+    renderer.end_render_pass();
+
+    renderer.begin_default_render_pass(
+      gfx::PassAction{
+        gfx::ColorAction {
+          .color = gfx::Color(0.5, 0.0, 0.0, 1.0),
         }
       }
     );
@@ -274,6 +309,7 @@ int main(int, char**) {
     renderer.set_bindings(bind);
     renderer.set_uniforms(gfx::MAKE_MEMORY(uniforms));
     renderer.draw(0, 36, 1);
+    renderer.end_render_pass();
 
 #ifdef USE_OPENGL
     SDL_GL_SwapWindow(window);

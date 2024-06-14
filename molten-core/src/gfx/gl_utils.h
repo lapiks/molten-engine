@@ -13,8 +13,27 @@ namespace gfx {
 
   GLenum get_gl_texture_format(TextureFormat format) {
     switch (format) {
-    case TextureFormat::RGB: return GL_RGB;
-    case TextureFormat::RGBA: return GL_RGBA;
+    case TextureFormat::RGB8: return GL_RGB;
+    case TextureFormat::RGBA8: return GL_RGBA;
+    case TextureFormat::DEPTH: return GL_DEPTH_COMPONENT;
+    }
+    return GL_NONE;
+  }
+
+  GLenum get_gl_texture_pixel_type(TextureFormat format) {
+    switch (format) {
+    case TextureFormat::RGB8: return GL_UNSIGNED_BYTE;
+    case TextureFormat::RGBA8: return GL_UNSIGNED_BYTE;
+    case TextureFormat::DEPTH: return GL_FLOAT;
+    }
+    return GL_NONE;
+  }
+
+  GLenum get_gl_texture_internal_format(TextureFormat format) {
+    switch (format) {
+    case TextureFormat::RGB8: return GL_RGB8;
+    case TextureFormat::RGBA8: return GL_RGBA8;
+    case TextureFormat::DEPTH: return GL_DEPTH_COMPONENT32F;
     }
     return GL_NONE;
   }

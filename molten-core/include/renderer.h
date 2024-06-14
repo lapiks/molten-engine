@@ -19,7 +19,7 @@ namespace gfx {
   using Buffer = uint32_t;
   using Texture = uint32_t;
   using Shader = uint32_t;
-  using Pass = uint32_t;
+  using RenderPass = uint32_t;
   using Pipeline = uint32_t;
 
   // ENUMS
@@ -34,8 +34,9 @@ namespace gfx {
   };
 
   enum class TextureFormat {
-    RGB,
-    RGBA,
+    RGB8,
+    RGBA8,
+    DEPTH,
   };
 
   enum class PrimitiveType {
@@ -116,10 +117,6 @@ namespace gfx {
     StencilAction stencil_action;
   };
 
-  struct PassData {
-
-  };
-
   struct PipelineCommon {
     PrimitiveType primitive_type = PrimitiveType::TRIANGLES;
   };
@@ -158,7 +155,7 @@ namespace gfx {
   struct TextureDesc {
     Memory mem;
     TextureType type = TextureType::TEXTURE_2D;
-    TextureFormat format = TextureFormat::RGB;
+    TextureFormat format = TextureFormat::RGB8;
     uint32_t width = 0;
     uint32_t height = 0;
   };
@@ -176,8 +173,9 @@ namespace gfx {
     IndexType index_type;
   };
 
-  struct PassDesc {
-
+  struct RenderPassDesc {
+    std::vector<Texture> colors;
+    Texture depth;
   };
 
   struct Rect {
@@ -196,8 +194,9 @@ namespace gfx {
   public:
     void init(const InitInfo& info);
     void shutdown();
-    void begin_pass(Pass pass, const PassAction& action);
-    void begin_default_pass(const PassAction& action);
+    void begin_default_render_pass(const PassAction& action);
+    void begin_render_pass(RenderPass pass, const PassAction& action);
+    void end_render_pass();
     void set_pipeline(Pipeline pipe);
     void set_bindings(Bindings bind);
     void set_uniforms(const Memory& mem);
@@ -208,16 +207,14 @@ namespace gfx {
     Buffer new_buffer(const BufferDesc& desc);
     Texture new_texture(const TextureDesc& desc);
     Shader new_shader(const ShaderDesc& desc);
-    Pass new_pass();
+    RenderPass new_render_pass(const RenderPassDesc& desc);
     Pipeline new_pipeline(const PipelineDesc& desc);
 
   private:
     uint32_t _buffer_id = 0;
     uint32_t _texture_id = 0;
     uint32_t _shader_id = 0;
-    uint32_t _pass_id = 0;
+    uint32_t _render_pass_id = 0;
     uint32_t _pipeline_id = 0;
-
-    PassData _passes[MAX_PASSES];
   };
 }

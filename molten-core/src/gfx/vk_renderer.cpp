@@ -134,7 +134,10 @@ void gfx::VKRenderer::shutdown() {
   } 
 }
 
-void gfx::VKRenderer::begin_pass(PassData* pass, const PassAction& action) {
+void gfx::VKRenderer::begin_render_pass(std::optional<RenderPass> pass, const PassAction& action) {
+}
+
+void gfx::VKRenderer::end_render_pass() {
 }
 
 void gfx::VKRenderer::set_pipeline(Pipeline pipe) {
@@ -273,7 +276,7 @@ bool gfx::VKRenderer::new_shader(Shader h, const ShaderDesc& desc) {
   return false;
 }
 
-bool gfx::VKRenderer::new_pass(Pass h) {
+bool gfx::VKRenderer::new_render_pass(RenderPass h, const RenderPassDesc& desc) {
   // todo
   return false;
 }

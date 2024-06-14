@@ -5,6 +5,7 @@
 #include <vector>
 #include <deque>
 #include <functional>
+#include <optional>
 
 namespace gfx {
 
@@ -58,7 +59,8 @@ namespace gfx {
 
     void init(const InitInfo& info);
     void shutdown();
-    void begin_pass(PassData* pass, const PassAction& action);
+    void begin_render_pass(std::optional<RenderPass> pass, const PassAction& action);
+    void end_render_pass();
     void set_pipeline(Pipeline pipe);
     void set_bindings(Bindings bind);
     void set_uniforms(const Memory& mem);
@@ -69,7 +71,7 @@ namespace gfx {
     bool new_buffer(Buffer h, const BufferDesc& desc);
     bool new_texture(Texture h, const TextureDesc& desc);
     bool new_shader(Shader h, const ShaderDesc& desc);
-    bool new_pass(Pass h);
+    bool new_render_pass(RenderPass h, const RenderPassDesc&);
     bool new_pipeline(Pipeline h, const PipelineDesc& desc);
 
     FrameData& get_current_frame() { return _frames[_frame_number % FRAME_OVERLAP]; };

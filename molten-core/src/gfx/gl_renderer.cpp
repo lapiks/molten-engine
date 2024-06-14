@@ -28,17 +28,19 @@ namespace gfx {
 
     GLenum target = get_gl_texture_target(desc.type);
     GLenum format = get_gl_texture_format(desc.format);
+    GLenum pixel_type = get_gl_texture_pixel_type(desc.format);
+    GLenum internal_format = get_gl_texture_internal_format(desc.format);
 
     glBindTexture(target, id);
 
     // todo: config this
     glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // todo: config data type
-    glTexImage2D(target, 0, GL_RGB, desc.width, desc.height, 0, format, GL_UNSIGNED_BYTE, desc.mem.data);
+    glTexImage2D(target, 0, internal_format, desc.width, desc.height, 0, format, pixel_type, desc.mem.data);
     glGenerateMipmap(target);
   }
 
@@ -120,6 +122,29 @@ namespace gfx {
     glDeleteProgram(id);
   }
 
+  void GLRenderPass::create(const GLFramebufferAttachments& att, GLuint default_fb) {
+    glGenFramebuffers(1, &fb_id);
+    glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
+
+    int color_target_idx = 0;
+    for (GLuint color_target : att.color_atts) {
+      int mip_level = 0;
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_target_idx, GL_TEXTURE_2D, color_target, mip_level);
+      ++color_target_idx;
+    }
+
+    int mip_level = 0;
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, att.depth_att, mip_level);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, default_fb);
+
+    attachments = att;
+  }
+
+  void GLRenderPass::destroy() {
+    glDeleteFramebuffers(1, &fb_id);
+  }
+
   void GLRenderer::init(const InitInfo& info) {
     if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
       std::cout << "Failed to initialize GLAD" << std::endl;
@@ -139,12 +164,13 @@ namespace gfx {
     glDeleteVertexArrays(1, &_state.global_vao);
   }
 
-  void GLRenderer::begin_pass(PassData* pass, const PassAction& action) {
+  void GLRenderer::begin_render_pass(std::optional<RenderPass> pass, const PassAction& action) {
     if (!pass) {
       glBindFramebuffer(GL_FRAMEBUFFER, _state.default_framebuffer);
     }
     else {
-
+      const GLRenderPass& rpass = _render_passes[pass.value()];
+      glBindFramebuffer(GL_FRAMEBUFFER, rpass.fb_id);
     }
     GLbitfield buffer_bit = 0;
     // clear action
@@ -160,6 +186,10 @@ namespace gfx {
       buffer_bit |= GL_STENCIL_BUFFER_BIT;
     }
     glClear(buffer_bit);
+  }
+
+  void GLRenderer::end_render_pass() {
+    glBindFramebuffer(GL_FRAMEBUFFER, _state.default_framebuffer);
   }
 
   void GLRenderer::set_pipeline(Pipeline pipe) {
@@ -249,7 +279,6 @@ namespace gfx {
         glDrawElements(primitive, num_elements, i_type, (const GLvoid*)0);
       }
     }
-     
   }
 
   void GLRenderer::set_viewport(const Rect& rect) {
@@ -281,8 +310,23 @@ namespace gfx {
     return true;
   }
 
-  bool GLRenderer::new_pass(Pass h) {
-    return false;
+  bool GLRenderer::new_render_pass(RenderPass h, const RenderPassDesc& desc) {
+    GLRenderPass& pass = _render_passes[h];
+
+    std::vector<GLuint> color_atts;
+    color_atts.reserve(desc.colors.size());
+    for (Texture color_tex : desc.colors) {
+      color_atts.push_back({ _textures[color_tex].id });
+    }
+    GLuint depth_att = _textures[desc.depth].id;
+    GLFramebufferAttachments attachments{
+      .color_atts = color_atts,
+      .depth_att = depth_att,
+    };
+
+    pass.create(attachments, _state.default_framebuffer);
+
+    return true;
   }
 
   bool GLRenderer::new_pipeline(Pipeline h, const PipelineDesc& desc) {

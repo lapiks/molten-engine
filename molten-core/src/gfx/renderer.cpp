@@ -35,13 +35,16 @@ namespace gfx {
     ctx.set_scissor(rect);
   }
 
-  void Renderer::begin_pass(Pass pass, const PassAction& action) {
-    PassData& pass_data = _passes[pass];
-    ctx.begin_pass(&pass_data, action);
+  void Renderer::begin_default_render_pass(const PassAction& action) {
+    ctx.begin_render_pass(std::nullopt, action);
   }
 
-  void Renderer::begin_default_pass(const PassAction& action) {
-    ctx.begin_pass(0, action);
+  void Renderer::begin_render_pass(RenderPass pass, const PassAction& action) {
+    ctx.begin_render_pass(pass, action);
+  }
+
+  void Renderer::end_render_pass() {
+    ctx.end_render_pass();
   }
 
   void Renderer::set_pipeline(Pipeline pipe) {
@@ -71,9 +74,9 @@ namespace gfx {
     return _shader_id++;
   }
 
-  Pass Renderer::new_pass() {
-    ctx.new_pass(_pass_id);
-    return _pass_id++;
+  RenderPass Renderer::new_render_pass(const RenderPassDesc& desc) {
+    ctx.new_render_pass(_render_pass_id, desc);
+    return _render_pass_id++;
   }
 
   Pipeline Renderer::new_pipeline(const PipelineDesc& desc) {
