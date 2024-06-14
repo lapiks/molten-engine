@@ -143,7 +143,7 @@ void gfx::VKRenderer::set_pipeline(Pipeline pipe) {
 void gfx::VKRenderer::set_bindings(Bindings bind) {
 }
 
-void gfx::VKRenderer::set_uniforms(ShaderStage stage, const Memory& mem) {
+void gfx::VKRenderer::set_uniforms(const Memory& mem) {
 }
 
 void gfx::VKRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances) {

@@ -272,7 +272,7 @@ int main(int, char**) {
     );
     renderer.set_pipeline(pipe);
     renderer.set_bindings(bind);
-    renderer.set_uniforms(gfx::ShaderStage::VERTEX, gfx::MAKE_MEMORY(uniforms));
+    renderer.set_uniforms(gfx::MAKE_MEMORY(uniforms));
     renderer.draw(0, 36, 1);
 
 #ifdef USE_OPENGL

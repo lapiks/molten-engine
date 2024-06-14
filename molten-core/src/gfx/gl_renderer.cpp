@@ -198,7 +198,7 @@ namespace gfx {
     }
   }
 
-  void GLRenderer::set_uniforms(ShaderStage stage, const Memory& mem) {
+  void GLRenderer::set_uniforms(const Memory& mem) {
      const GLUniformBlockLayout& uniform_layout = _state.current_pip->shader->uniforms_layout;
 
      for (const GLUniform& gl_uniform : uniform_layout.uniforms) {

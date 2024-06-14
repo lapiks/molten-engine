@@ -200,7 +200,7 @@ namespace gfx {
     void begin_default_pass(const PassAction& action);
     void set_pipeline(Pipeline pipe);
     void set_bindings(Bindings bind);
-    void set_uniforms(ShaderStage stage, const Memory& mem);
+    void set_uniforms(const Memory& mem);
     void draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances);
     void set_viewport(const Rect& rect);
     void set_scissor(const Rect& rect);

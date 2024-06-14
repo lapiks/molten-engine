@@ -52,8 +52,8 @@ namespace gfx {
     ctx.set_bindings(bind);
   }
 
-  void Renderer::set_uniforms(ShaderStage stage, const Memory& mem) {
-    ctx.set_uniforms(stage, mem);
+  void Renderer::set_uniforms(const Memory& mem) {
+    ctx.set_uniforms(mem);
   }
 
   Buffer Renderer::new_buffer(const BufferDesc& desc) {
