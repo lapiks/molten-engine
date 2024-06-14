@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <string>
 
 #define GFX_USE_OPENGL
 //#define GFX_USE_VULKAN
@@ -124,8 +125,9 @@ namespace gfx {
   };
 
   struct Bindings {
-    std::vector<Buffer> vertex_buffers;
+    Buffer vertex_buffer;
     Buffer index_buffer;
+    std::vector<Texture> textures;
   };
 
   struct VertexAttribute {
@@ -139,7 +141,7 @@ namespace gfx {
   };
 
   struct UniformDesc {
-    const char* name;
+    std::string name;
     UniformType type;
   };
 
@@ -165,6 +167,7 @@ namespace gfx {
     const char* vertex_src = nullptr;
     const char* fragment_src = nullptr;
     UniformBlockLayout uniforms_layout;
+    std::vector<std::string> texture_names;
   };
 
   struct PipelineDesc {

@@ -98,13 +98,21 @@ namespace gfx {
     int uniform_idx = 0;
     uint16_t offset = 0;
     for (const UniformDesc& uniform_desc : desc.uniforms_layout.uniforms) {
-      GLint loc = glGetUniformLocation(id, uniform_desc.name);
+      GLint loc = glGetUniformLocation(id, uniform_desc.name.c_str());
       uniforms_layout.uniforms[uniform_idx++] = GLUniform{
         .loc = loc,
         .type = uniform_desc.type,
         .offset = offset,
       };
       offset += get_gl_uniform_type_size(uniform_desc.type);
+    }
+
+    shader_textures.reserve(desc.texture_names.size());
+    for (const std::string& texture_name : desc.texture_names) {
+      shader_textures.push_back({
+          glGetUniformLocation(id, texture_name.c_str())
+        }
+      );
     }
   }
 
@@ -157,25 +165,40 @@ namespace gfx {
   void GLRenderer::set_pipeline(Pipeline pipe) {
     _state.pipeline = &_pipelines[pipe];
 
-    glUseProgram(_state.pipeline->shader.id);
+    glUseProgram(_state.pipeline->shader->id);
   }
 
   void GLRenderer::set_bindings(Bindings bind) {
-    // todo manage multiple VBO?
-    _state.vertex_buffer = &_buffers[bind.vertex_buffers[0]];
+    const GLPipeline* pip = _state.pipeline;
+    const GLShader* shader = pip->shader;
+    
+    _state.vertex_buffer = &_buffers[bind.vertex_buffer];
     _state.index_buffer = &_buffers[bind.index_buffer];
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _state.index_buffer->id);
     glBindBuffer(GL_VERTEX_ARRAY, _state.vertex_buffer->id);
     for (int i = 0; i < MAX_ATTRIBUTES; i++) {
       const GLVertexAttribute& attr = _state.pipeline->attributes[i];
       glVertexAttribPointer(i, attr.size, attr.type, GL_FALSE, (GLsizei)attr.stride, (const GLvoid*)attr.offset);
       glEnableVertexAttribArray(i);
     }
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _state.index_buffer->id);
+
+    if (bind.textures.size() > shader->shader_textures.size()) {
+      std::cout << "Bindings texture count and shader definition dit not match" << std::endl;
+      return;
+    }
+
+    int texture_idx = 0;
+    for (const ShaderTexture& shader_tex : shader->shader_textures) {
+      const GLTexture& gl_texture = _textures[bind.textures[texture_idx]];
+      glActiveTexture(GL_TEXTURE0 + texture_idx);
+      glBindTexture(GL_TEXTURE_2D, gl_texture.id);
+      glUniform1i(shader_tex.uniform_loc, texture_idx);
+    }
   }
 
   void GLRenderer::set_uniforms(ShaderStage stage, const Memory& mem) {
-     const GLUniformBlockLayout& uniform_layout = _state.pipeline->shader.uniforms_layout;
+     const GLUniformBlockLayout& uniform_layout = _state.pipeline->shader->uniforms_layout;
 
      for (const GLUniform& gl_uniform : uniform_layout.uniforms) {
        GLfloat* float_ptr = (GLfloat*)((uint8_t*)mem.data + gl_uniform.offset);
@@ -263,7 +286,7 @@ namespace gfx {
 
   bool GLRenderer::new_pipeline(Pipeline h, const PipelineDesc& desc) {
     GLPipeline& pipe = _pipelines[h];
-    pipe.shader = _shaders[desc.shader];
+    pipe.shader = &_shaders[desc.shader];
     pipe.index_type = get_gl_index_type(desc.index_type);
 
     size_t offset = 0;

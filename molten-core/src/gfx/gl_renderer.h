@@ -36,11 +36,15 @@ namespace gfx {
     std::array<GLUniform, MAX_UNIFORMS> uniforms;
   };
 
+  struct ShaderTexture {
+    GLint uniform_loc;
+  };
+
   struct GLShader {
     void create(const ShaderDesc& desc);
     void destroy();
-
     GLUniformBlockLayout uniforms_layout;
+    std::vector<ShaderTexture> shader_textures;
     GLuint id;
   };
 
@@ -54,7 +58,8 @@ namespace gfx {
 
   struct GLPipeline {
     PipelineCommon pipeline_common;
-    GLShader shader;
+    Shader shader_id;
+    GLShader* shader;
     GLVertexAttribute attributes[MAX_ATTRIBUTES];
     GLenum index_type;
   };

@@ -24,18 +24,22 @@ struct BasicShader {
     "layout (location = 2) in vec2 a_uv;\n"
     "uniform mat4 u_mvp;\n"
     "out vec4 io_color;\n"
+    "out vec2 io_uv;\n"
     "void main()\n"
     "{\n"
     "   io_color = a_color;\n"
+    "   io_uv = a_uv;\n"
     "   gl_Position = u_mvp * vec4(a_pos, 1.0);\n"
     "}\0";
 
   static inline const char* FRAGMENT = "#version 330 core\n"
     "in vec4 io_color;\n"
+    "in vec2 io_uv;\n"
     "out vec4 FragColor;\n"
+    "uniform sampler2D u_tex;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = io_color;\n"
+    "   FragColor = mix(texture(u_tex, io_uv), io_color, 0.5);\n"
     "}\n\0";
 
   struct Uniforms {
@@ -53,7 +57,8 @@ struct BasicShader {
             .type = gfx::UniformType::MAT4,
           }
         },
-      }
+      },
+      .texture_names = { "u_tex" },
     };
   }
 };
@@ -175,15 +180,10 @@ int main(int, char**) {
     }
     );
 
-  gfx::Bindings bind{
-    .vertex_buffers = { vbuffer },
-    .index_buffer = ibuffer,
-  };
-
   // todo path to asset folder
   core::Image image = core::load_image("C:/Users/dheni/source/repos/molten-engine/molten-runtime/assets/container.jpg");
 
-  gfx::Texture gfx_image = renderer.new_texture(
+  gfx::Texture gfx_texture = renderer.new_texture(
     gfx::TextureDesc{
       gfx::Memory(image.data),
       gfx::TextureType::TEXTURE_2D,
@@ -192,6 +192,12 @@ int main(int, char**) {
       image.height
     }
   );
+
+  gfx::Bindings bind{
+    .vertex_buffer = vbuffer,
+    .index_buffer = ibuffer,
+    .textures = { gfx_texture },
+  };
 
   glm::vec2 rotation = glm::vec2(0);
 
@@ -213,7 +219,7 @@ int main(int, char**) {
           stop_rendering = false;
         }
       }
-                          break;
+      break;
 
       default:
         break;
