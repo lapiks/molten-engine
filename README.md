@@ -1,5 +1,5 @@
 # Molten Engine
-A work in progress C++ game engine.
+A work in progress C++ voxel engine.
 
 ## Goals
 - OpenGL support
