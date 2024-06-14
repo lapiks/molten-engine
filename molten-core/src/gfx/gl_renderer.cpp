@@ -91,7 +91,7 @@ namespace gfx {
       return;
     }
 
-    // delete shaders as they are already attached to the program
+    // delete shaders as they are already attached to the program and we don't need them anymore
     glDeleteShader(vs);
     glDeleteShader(fs);
 
@@ -163,22 +163,22 @@ namespace gfx {
   }
 
   void GLRenderer::set_pipeline(Pipeline pipe) {
-    _state.pipeline = &_pipelines[pipe];
+    _state.current_pip = &_pipelines[pipe];
 
-    glUseProgram(_state.pipeline->shader->id);
+    glUseProgram(_state.current_pip->shader->id);
   }
 
   void GLRenderer::set_bindings(Bindings bind) {
-    const GLPipeline* pip = _state.pipeline;
+    const GLPipeline* pip = _state.current_pip;
     const GLShader* shader = pip->shader;
     
-    _state.vertex_buffer = &_buffers[bind.vertex_buffer];
-    _state.index_buffer = &_buffers[bind.index_buffer];
+    const GLBuffer& vertex_buffer = _buffers[bind.vertex_buffer];
+    const GLBuffer& index_buffer = _buffers[bind.index_buffer];
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _state.index_buffer->id);
-    glBindBuffer(GL_VERTEX_ARRAY, _state.vertex_buffer->id);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer.id);
+    glBindBuffer(GL_VERTEX_ARRAY, vertex_buffer.id);
     for (int i = 0; i < MAX_ATTRIBUTES; i++) {
-      const GLVertexAttribute& attr = _state.pipeline->attributes[i];
+      const GLVertexAttribute& attr = pip->attributes[i];
       glVertexAttribPointer(i, attr.size, attr.type, GL_FALSE, (GLsizei)attr.stride, (const GLvoid*)attr.offset);
       glEnableVertexAttribArray(i);
     }
@@ -189,16 +189,16 @@ namespace gfx {
     }
 
     int texture_idx = 0;
-    for (const ShaderTexture& shader_tex : shader->shader_textures) {
-      const GLTexture& gl_texture = _textures[bind.textures[texture_idx]];
+    for (Texture tex : bind.textures) {
+      const GLTexture& gl_texture = _textures[tex];
       glActiveTexture(GL_TEXTURE0 + texture_idx);
       glBindTexture(GL_TEXTURE_2D, gl_texture.id);
-      glUniform1i(shader_tex.uniform_loc, texture_idx);
+      glUniform1i(shader->shader_textures[texture_idx].uniform_loc, texture_idx);
     }
   }
 
   void GLRenderer::set_uniforms(ShaderStage stage, const Memory& mem) {
-     const GLUniformBlockLayout& uniform_layout = _state.pipeline->shader->uniforms_layout;
+     const GLUniformBlockLayout& uniform_layout = _state.current_pip->shader->uniforms_layout;
 
      for (const GLUniform& gl_uniform : uniform_layout.uniforms) {
        GLfloat* float_ptr = (GLfloat*)((uint8_t*)mem.data + gl_uniform.offset);
@@ -237,8 +237,8 @@ namespace gfx {
   }
 
   void GLRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances) {
-    GLenum primitive = get_gl_primitive_type(_state.pipeline->pipeline_common.primitive_type);
-    GLenum i_type = _state.pipeline->index_type;
+    GLenum primitive = get_gl_primitive_type(_state.current_pip->pipeline_common.primitive_type);
+    GLenum i_type = _state.current_pip->index_type;
 
     if (num_instances > 0) {
       if (i_type == GL_NONE) {

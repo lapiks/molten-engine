@@ -36,7 +36,7 @@ namespace gfx {
     std::array<GLUniform, MAX_UNIFORMS> uniforms;
   };
 
-  struct ShaderTexture {
+  struct GLShaderTexture {
     GLint uniform_loc;
   };
 
@@ -44,7 +44,7 @@ namespace gfx {
     void create(const ShaderDesc& desc);
     void destroy();
     GLUniformBlockLayout uniforms_layout;
-    std::vector<ShaderTexture> shader_textures;
+    std::vector<GLShaderTexture> shader_textures;
     GLuint id;
   };
 
@@ -88,10 +88,9 @@ namespace gfx {
     std::array<GLShader, MAX_SHADERS> _shaders;
     std::array<GLPipeline, MAX_PIPELINES> _pipelines;
 
+    // Current GL state
     struct GLState {
-      GLPipeline* pipeline;
-      GLBuffer* vertex_buffer;
-      GLBuffer* index_buffer;
+      GLPipeline* current_pip;
       GLuint global_vao;
       GLuint default_framebuffer;
     };
