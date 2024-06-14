@@ -40,7 +40,7 @@ struct BasicShader {
     "uniform sampler2D u_tex2;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = mix(texture(u_tex2, io_uv), mix(texture(u_tex1, io_uv), io_color, 0.5), 0.5);\n"
+    "   FragColor = mix(texture(u_tex2, io_uv), texture(u_tex1, io_uv), 0.5);\n"
     "}\n\0";
 
   struct Uniforms {
@@ -239,6 +239,7 @@ int main(int, char**) {
   );
 
   glm::vec2 rotation = glm::vec2(0);
+  uint32_t frame_number = 0;
 
   bool should_close = false;
   bool stop_rendering = false;
@@ -290,11 +291,12 @@ int main(int, char**) {
       .mvp = proj * view * model,
     };
 
+    float flash = std::abs(std::sin(frame_number / 120.f));
     renderer.begin_render_pass(
       offscreen_pass,
       gfx::PassAction{
         gfx::ColorAction {
-          .color = gfx::Color(0.0, 0.0, 1.0, 1.0),
+          .color = gfx::Color(0.0, 0.0, flash, 1.0),
         }
       }
     );
@@ -313,6 +315,8 @@ int main(int, char**) {
     renderer.set_uniforms(gfx::MAKE_MEMORY(uniforms));
     renderer.draw(0, 36, 1);
     renderer.end_render_pass();
+
+    ++frame_number;
 
 #ifdef USE_OPENGL
     SDL_GL_SwapWindow(window);
