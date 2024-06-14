@@ -85,7 +85,7 @@ int main(int, char**) {
     SDL_WINDOWPOS_UNDEFINED,
     window_width,
     window_height,
-    windowFlags
+    windowFlags | SDL_WINDOW_RESIZABLE
   );
   if (!window) {
     std::cerr << "Failed to initialize SDL window. Error: " << SDL_GetError() << std::endl;
@@ -229,6 +229,9 @@ int main(int, char**) {
         }
         if (event.window.event == SDL_WINDOWEVENT_RESTORED) {
           stop_rendering = false;
+        }
+        if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+          renderer.set_viewport({ 0, 0, (uint16_t)event.window.data1, (uint16_t)event.window.data2 });
         }
       }
       break;
