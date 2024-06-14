@@ -36,10 +36,11 @@ struct BasicShader {
     "in vec4 io_color;\n"
     "in vec2 io_uv;\n"
     "out vec4 FragColor;\n"
-    "uniform sampler2D u_tex;\n"
+    "uniform sampler2D u_tex1;\n"
+    "uniform sampler2D u_tex2;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = mix(texture(u_tex, io_uv), io_color, 0.5);\n"
+    "   FragColor = mix(texture(u_tex2, io_uv), mix(texture(u_tex1, io_uv), io_color, 0.5), 0.5);\n"
     "}\n\0";
 
   struct Uniforms {
@@ -58,7 +59,7 @@ struct BasicShader {
           }
         },
       },
-      .texture_names = { "u_tex" },
+      .texture_names = { "u_tex1", "u_tex2" },
     };
   }
 };
@@ -181,22 +182,33 @@ int main(int, char**) {
     );
 
   // todo path to asset folder
-  core::Image image = core::load_image("C:/Users/dheni/source/repos/molten-engine/molten-runtime/assets/container.jpg");
+  core::Image container_img = core::load_image("C:/Users/dheni/source/repos/molten-engine/molten-runtime/assets/container.jpg");
+  core::Image face_img = core::load_image("C:/Users/dheni/source/repos/molten-engine/molten-runtime/assets/awesomeface.png");
 
-  gfx::Texture gfx_texture = renderer.new_texture(
+  gfx::Texture gfx_container = renderer.new_texture(
     gfx::TextureDesc{
-      gfx::Memory(image.data),
+      gfx::Memory(container_img.data),
       gfx::TextureType::TEXTURE_2D,
       gfx::TextureFormat::RGB,
-      image.width,
-      image.height
+      container_img.width,
+      container_img.height
+    }
+  );
+
+  gfx::Texture gfx_face = renderer.new_texture(
+    gfx::TextureDesc{
+      gfx::Memory(face_img.data),
+      gfx::TextureType::TEXTURE_2D,
+      gfx::TextureFormat::RGBA,
+      face_img.width,
+      face_img.height
     }
   );
 
   gfx::Bindings bind{
     .vertex_buffer = vbuffer,
     .index_buffer = ibuffer,
-    .textures = { gfx_texture },
+    .textures = { gfx_container, gfx_face },
   };
 
   glm::vec2 rotation = glm::vec2(0);
