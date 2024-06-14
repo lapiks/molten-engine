@@ -190,6 +190,7 @@ int main(int, char**) {
       gfx::Memory(container_img.data),
       gfx::TextureType::TEXTURE_2D,
       gfx::TextureFormat::RGB8,
+      true,
       container_img.width,
       container_img.height
     }
@@ -200,6 +201,7 @@ int main(int, char**) {
       gfx::Memory(face_img.data),
       gfx::TextureType::TEXTURE_2D,
       gfx::TextureFormat::RGBA8,
+      true,
       face_img.width,
       face_img.height
     }

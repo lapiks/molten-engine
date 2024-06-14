@@ -7,6 +7,7 @@ namespace gfx {
     switch (type) {
     case TextureType::TEXTURE_1D: return GL_TEXTURE_1D;
     case TextureType::TEXTURE_2D: return GL_TEXTURE_2D;
+    case TextureType::TEXTURE_3D: return GL_TEXTURE_3D;
     }
     return GL_NONE;
   }

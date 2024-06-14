@@ -31,6 +31,7 @@ namespace gfx {
   enum class TextureType {
     TEXTURE_1D,
     TEXTURE_2D,
+    TEXTURE_3D,
   };
 
   enum class TextureFormat {
@@ -156,8 +157,10 @@ namespace gfx {
     Memory mem;
     TextureType type = TextureType::TEXTURE_2D;
     TextureFormat format = TextureFormat::RGB8;
+    bool generate_mip_maps = true;
     uint32_t width = 0;
     uint32_t height = 0;
+    uint32_t depth = 0;
   };
 
   struct ShaderDesc {

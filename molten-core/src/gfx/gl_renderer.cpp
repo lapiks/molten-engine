@@ -39,9 +39,24 @@ namespace gfx {
     glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // todo: config data type
-    glTexImage2D(target, 0, internal_format, desc.width, desc.height, 0, format, pixel_type, desc.mem.data);
-    glGenerateMipmap(target);
+    switch (desc.type) {
+      using enum TextureType;
+      case TEXTURE_1D: {
+        glTexImage1D(target, 0, internal_format, desc.width, 0, format, pixel_type, desc.mem.data);
+      }
+      break;
+      case TEXTURE_2D: {
+        glTexImage2D(target, 0, internal_format, desc.width, desc.height, 0, format, pixel_type, desc.mem.data);
+      }
+      break;
+      case TEXTURE_3D: {
+        glTexImage3D(target, 0, internal_format, desc.width, desc.height, desc.depth, 0, format, pixel_type, desc.mem.data);
+      }
+      break;
+    }
+    
+    if(desc.generate_mip_maps)
+      glGenerateMipmap(target);
   }
 
   void GLTexture::destroy() {
