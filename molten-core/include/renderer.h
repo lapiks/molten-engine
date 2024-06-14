@@ -124,7 +124,7 @@ namespace gfx {
   };
 
   struct Bindings {
-    Buffer vertex_buffers[MAX_VERTEX_BUFFERS];
+    std::vector<Buffer> vertex_buffers;
     Buffer index_buffer;
   };
 

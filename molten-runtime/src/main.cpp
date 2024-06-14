@@ -175,9 +175,10 @@ int main(int, char**) {
     }
     );
 
-  gfx::Bindings bind;
-  bind.vertex_buffers[0] = vbuffer;
-  bind.index_buffer = ibuffer;
+  gfx::Bindings bind{
+    .vertex_buffers = { vbuffer },
+    .index_buffer = ibuffer,
+  };
 
   // todo path to asset folder
   core::Image image = core::load_image("C:/Users/dheni/source/repos/molten-engine/molten-runtime/assets/container.jpg");
