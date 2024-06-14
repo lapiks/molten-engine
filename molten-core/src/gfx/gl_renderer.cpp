@@ -194,6 +194,7 @@ namespace gfx {
       glActiveTexture(GL_TEXTURE0 + texture_idx);
       glBindTexture(GL_TEXTURE_2D, gl_texture.id);
       glUniform1i(shader->shader_textures[texture_idx].uniform_loc, texture_idx);
+      ++texture_idx;
     }
   }
 
