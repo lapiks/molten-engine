@@ -175,9 +175,10 @@ int main(int, char**) {
 
   gfx::Pipeline pipe = renderer.new_pipeline(
     gfx::PipelineDesc{
-      shader,
-      layout,
-      gfx::IndexType::UINT16,
+      .shader = shader,
+      .layout = layout,
+      .index_type = gfx::IndexType::UINT16,
+      .cull = gfx::CullMode::FRONT,
     }
     );
 

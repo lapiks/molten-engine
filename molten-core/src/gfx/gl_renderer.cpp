@@ -182,8 +182,7 @@ namespace gfx {
   void GLRenderer::begin_render_pass(std::optional<RenderPass> pass, const PassAction& action) {
     if (!pass) {
       glBindFramebuffer(GL_FRAMEBUFFER, _state.default_framebuffer);
-    }
-    else {
+    } else {
       const GLRenderPass& rpass = _render_passes[pass.value()];
       glBindFramebuffer(GL_FRAMEBUFFER, rpass.fb_id);
     }
@@ -211,6 +210,14 @@ namespace gfx {
     _state.current_pip = &_pipelines[pipe];
 
     glUseProgram(_state.current_pip->shader->id);
+
+    // set render state
+    if (_state.current_pip->cull_mode == GL_NONE) {
+      glDisable(GL_CULL_FACE);
+    } else {
+      glEnable(GL_CULL_FACE);
+      glCullFace(_state.current_pip->cull_mode);
+    }
   }
 
   void GLRenderer::set_bindings(Bindings bind) {
@@ -283,14 +290,13 @@ namespace gfx {
   }
 
   void GLRenderer::draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances) {
-    GLenum primitive = get_gl_primitive_type(_state.current_pip->pipeline_common.primitive_type);
+    GLenum primitive = _state.current_pip->primitive_type;
     GLenum i_type = _state.current_pip->index_type;
 
     if (num_instances > 0) {
       if (i_type == GL_NONE) {
         glDrawArrays(primitive, first_element, num_elements);
-      }
-      else {
+      } else {
         glDrawElements(primitive, num_elements, i_type, (const GLvoid*)0);
       }
     }
@@ -348,6 +354,8 @@ namespace gfx {
     GLPipeline& pipe = _pipelines[h];
     pipe.shader = &_shaders[desc.shader];
     pipe.index_type = get_gl_index_type(desc.index_type);
+    pipe.cull_mode = get_gl_cull_mode(desc.cull);
+    pipe.primitive_type = get_gl_primitive_type(desc.primitibe_type);
 
     size_t offset = 0;
     for (int i = 0; i < MAX_ATTRIBUTES; i++) {

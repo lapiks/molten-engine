@@ -79,6 +79,12 @@ namespace gfx {
     CLEAR,
   };
 
+  enum class CullMode {
+    NONE,
+    FRONT,
+    BACK,
+  };
+
   // STRUCTS
   struct InitInfo {
     SDL_Window* window = nullptr;
@@ -116,10 +122,6 @@ namespace gfx {
     ColorAction color_action;
     DepthAction depth_action;
     StencilAction stencil_action;
-  };
-
-  struct PipelineCommon {
-    PrimitiveType primitive_type = PrimitiveType::TRIANGLES;
   };
 
   struct Bindings {
@@ -173,7 +175,9 @@ namespace gfx {
   struct PipelineDesc {
     Shader shader;
     VertexLayout layout;
-    IndexType index_type;
+    IndexType index_type = IndexType::UINT16;
+    PrimitiveType primitibe_type = PrimitiveType::TRIANGLES;
+    CullMode cull = CullMode::NONE;
   };
 
   struct RenderPassDesc {

@@ -103,5 +103,14 @@ namespace gfx {
     }
     return 0;
   }
+
+  GLenum get_gl_cull_mode(CullMode mode) {
+    switch (mode) {
+    case CullMode::NONE: return GL_NONE;
+    case CullMode::FRONT: return GL_FRONT;
+    case CullMode::BACK: return GL_BACK;
+    }
+    return GL_NONE;
+  }
 }
 

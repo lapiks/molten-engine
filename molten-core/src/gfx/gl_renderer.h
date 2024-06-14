@@ -72,11 +72,12 @@ namespace gfx {
   };
 
   struct GLPipeline {
-    PipelineCommon pipeline_common;
     Shader shader_id;
     GLShader* shader;
     GLVertexAttribute attributes[MAX_ATTRIBUTES];
     GLenum index_type;
+    GLenum primitive_type;
+    GLenum cull_mode;
   };
 
   class GLRenderer {
