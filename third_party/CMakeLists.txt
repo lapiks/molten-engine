@@ -18,13 +18,13 @@ target_sources(vkbootstrap PRIVATE
 target_include_directories(vkbootstrap PUBLIC vkbootstrap)
 target_link_libraries(vkbootstrap PUBLIC Vulkan::Vulkan $<$<BOOL:UNIX>:${CMAKE_DL_LIBS}>)
 
-target_include_directories(vma INTERFACE vma)
+target_include_directories(vma INTERFACE VulkanMemoryAllocator-3.1.0)
 target_include_directories(stb_image INTERFACE stb_image)
-target_include_directories(glm INTERFACE glm)
+target_include_directories(glm INTERFACE glm-1.0)
 
 add_library(imgui STATIC)
 
-target_include_directories(imgui PUBLIC imgui)
+target_include_directories(imgui PUBLIC imgui-1.90.7)
 
 target_sources(imgui PRIVATE 
   imgui-1.90.7/imgui.h
