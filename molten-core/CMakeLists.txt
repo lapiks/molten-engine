@@ -5,12 +5,9 @@ add_subdirectory(src/gfx)
 
 add_library(MoltenCore "src/engine.cpp" "src/image.cpp" "include/image.h")
 
-target_link_libraries(MoltenCore PUBLIC MoltenGfx)
+target_link_libraries(MoltenCore PUBLIC MoltenGfx stb_image glm fastgltf)
 
 target_include_directories(MoltenCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_include_directories(MoltenCore PUBLIC ${CMAKE_SOURCE_DIR}/third_party/glm-1.0)
-target_include_directories(MoltenCore PUBLIC ${CMAKE_SOURCE_DIR}/third_party/stb_image)
-target_include_directories(MoltenCore PUBLIC ${CMAKE_SOURCE_DIR}/third_party/fastgltf-0.7.1/include)
 
 set_target_properties(MoltenCore PROPERTIES
     CXX_STANDARD 20
