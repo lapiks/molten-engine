@@ -181,12 +181,12 @@ namespace gfx {
   };
 
   struct Rect {
-    uint16_t x = 0;
-    uint16_t y = 0;
-    uint16_t width = 0;
-    uint16_t height = 0;
+    uint32_t x = 0;
+    uint32_t y = 0;
+    uint32_t width = 0;
+    uint32_t height = 0;
 
-    Rect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) : x(x), y(y), width(width), height(height) {}
+    Rect(uint32_t x, uint32_t y, uint32_t width, uint32_t height) : x(x), y(y), width(width), height(height) {}
   };
 
   /*!

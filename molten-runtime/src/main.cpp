@@ -71,8 +71,8 @@ int main(int, char**) {
     return 1;
   }
 
-  int window_width = 1024;
-  int window_height = 680;
+  uint32_t window_width = 1024;
+  uint32_t window_height = 680;
 
 #ifdef USE_OPENGL
   int windowFlags = SDL_WINDOW_OPENGL;
@@ -231,7 +231,9 @@ int main(int, char**) {
           stop_rendering = false;
         }
         if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-          renderer.set_viewport({ 0, 0, (uint16_t)event.window.data1, (uint16_t)event.window.data2 });
+          window_width = event.window.data1;
+          window_height = event.window.data2;
+          renderer.set_viewport({ 0, 0, window_width, window_height });
         }
       }
       break;
