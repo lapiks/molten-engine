@@ -15,8 +15,7 @@ namespace gfx {
     glBindBuffer(gl_buffer_type, id);
     glBufferData(gl_buffer_type, desc.mem.size, desc.mem.data, GL_STATIC_DRAW);
 
-    // init renderer state
-    glEnable(GL_DEPTH_TEST);
+    glBindBuffer(gl_buffer_type, 0);
   }
 
   void GLBuffer::destroy() {
@@ -26,7 +25,7 @@ namespace gfx {
   void GLTexture::create(const TextureDesc& desc) {
     glGenTextures(1, &id);
 
-    GLenum target = get_gl_texture_target(desc.type);
+    target = get_gl_texture_target(desc.type);
     GLenum format = get_gl_texture_format(desc.format);
     GLenum pixel_type = get_gl_texture_pixel_type(desc.format);
     GLenum internal_format = get_gl_texture_internal_format(desc.format);
@@ -142,14 +141,19 @@ namespace gfx {
     glBindFramebuffer(GL_FRAMEBUFFER, fb_id);
 
     int color_target_idx = 0;
-    for (GLuint color_target : att.color_atts) {
+    for (GLuint texture_id : att.color_texture_ids) {
       int mip_level = 0;
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_target_idx, GL_TEXTURE_2D, color_target, mip_level);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + color_target_idx, GL_TEXTURE_2D, texture_id, mip_level);
       ++color_target_idx;
     }
 
-    int mip_level = 0;
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, att.depth_att, mip_level);
+    if (att.depth_att.has_value()) {
+      int mip_level = 0;
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, att.depth_att.value(), mip_level);
+    }
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+      std::cout << "Framebuffer not complete!" << std::endl;
 
     glBindFramebuffer(GL_FRAMEBUFFER, default_fb);
 
@@ -172,6 +176,9 @@ namespace gfx {
 
     // get the default framebuffer binding
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&_state.default_framebuffer);
+
+    // init renderer state
+    glEnable(GL_DEPTH_TEST);
   }
 
   void GLRenderer::shutdown() {
@@ -185,6 +192,8 @@ namespace gfx {
     } else {
       const GLRenderPass& rpass = _render_passes[pass.value()];
       glBindFramebuffer(GL_FRAMEBUFFER, rpass.fb_id);
+      // enables MRT
+      glDrawBuffers((GLsizei)rpass.attachments.color_atts.size(), rpass.attachments.color_atts.data());
     }
     GLbitfield buffer_bit = 0;
     // clear action
@@ -223,12 +232,16 @@ namespace gfx {
   void GLRenderer::set_bindings(Bindings bind) {
     const GLPipeline* pip = _state.current_pip;
     const GLShader* shader = pip->shader;
-    
-    const GLBuffer& vertex_buffer = _buffers[bind.vertex_buffer];
-    const GLBuffer& index_buffer = _buffers[bind.index_buffer];
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer.id);
-    glBindBuffer(GL_VERTEX_ARRAY, vertex_buffer.id);
+    if (bind.index_buffer.has_value()) {
+      GLBuffer& index_buffer = _buffers[bind.index_buffer.value()];
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer.id);
+      _state.index_buffer = &index_buffer;
+    }
+    
+    GLBuffer& vertex_buffer = _buffers[bind.vertex_buffer];
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer.id);
+    _state.vertex_buffer = &vertex_buffer;
     for (int i = 0; i < MAX_ATTRIBUTES; i++) {
       const GLVertexAttribute& attr = pip->attributes[i];
       glVertexAttribPointer(i, attr.size, attr.type, GL_FALSE, (GLsizei)attr.stride, (const GLvoid*)attr.offset);
@@ -310,6 +323,24 @@ namespace gfx {
     glScissor(rect.x, rect.y, rect.width, rect.height);
   }
 
+  void GLRenderer::submit() {
+    if (_state.vertex_buffer) {
+      glBindBuffer(GL_VERTEX_ARRAY, 0);
+      _state.vertex_buffer = nullptr;
+    }
+    if (_state.index_buffer) {
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+      _state.index_buffer = nullptr;
+    }
+    for (int i = 0; i < MAX_SHADER_TEXTURES; ++i) {
+      GLTexture* tex = _state.textures[i];
+      if (tex) {
+        glBindTexture(tex->target, 0);
+        tex = nullptr;
+      }
+    }
+  }
+
   bool GLRenderer::new_buffer(Buffer h, const BufferDesc& desc) {
     GLBuffer& buffer = _buffers[h];
     buffer.create(desc);
@@ -334,13 +365,22 @@ namespace gfx {
   bool GLRenderer::new_render_pass(RenderPass h, const RenderPassDesc& desc) {
     GLRenderPass& pass = _render_passes[h];
 
-    std::vector<GLuint> color_atts;
+    std::vector<GLuint> textures_ids;
+    std::vector<GLenum> color_atts;
+    textures_ids.reserve(desc.colors.size());
     color_atts.reserve(desc.colors.size());
+    int att_idx = 0;
     for (Texture color_tex : desc.colors) {
-      color_atts.push_back({ _textures[color_tex].id });
+      textures_ids.push_back(_textures[color_tex].id);
+      color_atts.push_back(GL_COLOR_ATTACHMENT0 + att_idx++);
     }
-    GLuint depth_att = _textures[desc.depth].id;
+    std::optional<GLint> depth_att;
+    if (desc.depth.has_value()) {
+      GLuint depth_att = _textures[desc.depth.value()].id;
+    }
+
     GLFramebufferAttachments attachments{
+      .color_texture_ids = textures_ids,
       .color_atts = color_atts,
       .depth_att = depth_att,
     };

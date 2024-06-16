@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
+#include <optional>
 
 #define GFX_USE_OPENGL
 //#define GFX_USE_VULKAN
@@ -126,7 +127,7 @@ namespace gfx {
 
   struct Bindings {
     Buffer vertex_buffer;
-    Buffer index_buffer;
+    std::optional<Buffer> index_buffer;
     std::vector<Texture> textures;
   };
 
@@ -182,7 +183,7 @@ namespace gfx {
 
   struct RenderPassDesc {
     std::vector<Texture> colors;
-    Texture depth;
+    std::optional<Texture> depth;
   };
 
   struct Rect {
@@ -210,6 +211,7 @@ namespace gfx {
     void draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances);
     void set_viewport(const Rect& rect);
     void set_scissor(const Rect& rect);
+    void submit();
 
     Buffer new_buffer(const BufferDesc& desc);
     Texture new_texture(const TextureDesc& desc);

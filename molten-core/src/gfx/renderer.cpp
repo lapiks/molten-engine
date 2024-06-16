@@ -59,6 +59,10 @@ namespace gfx {
     ctx.set_uniforms(mem);
   }
 
+  void Renderer::submit() {
+    ctx.submit();
+  }
+
   Buffer Renderer::new_buffer(const BufferDesc& desc) {
     ctx.new_buffer(_buffer_id, desc);
     return _buffer_id++;

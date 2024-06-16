@@ -67,6 +67,7 @@ namespace gfx {
     void draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances);
     void set_viewport(const Rect& rect);
     void set_scissor(const Rect& rect);
+    void submit();
 
     bool new_buffer(Buffer h, const BufferDesc& desc);
     bool new_texture(Texture h, const TextureDesc& desc);

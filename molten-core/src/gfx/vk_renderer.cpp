@@ -261,6 +261,10 @@ void gfx::VKRenderer::set_scissor(const Rect& rect) {
   // todo
 }
 
+void gfx::VKRenderer::submit() {
+  // todo
+}
+
 bool gfx::VKRenderer::new_buffer(Buffer h, const BufferDesc& desc) {
   // todo
   return false;

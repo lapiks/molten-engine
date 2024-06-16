@@ -182,8 +182,7 @@ int main(int, char**) {
     }
     );
 
-  // todo path to asset folder
-  core::Image face_img = core::load_image("C:/Users/dheni/source/repos/molten-engine/examples/gfx-textured-cube/awesomeface.png");
+  core::Image face_img = core::load_image("assets/images/awesomeface.png");
 
   gfx::Texture gfx_face = renderer.new_texture(
     gfx::TextureDesc{
@@ -303,6 +302,8 @@ int main(int, char**) {
     renderer.set_uniforms(gfx::MAKE_MEMORY(uniforms));
     renderer.draw(0, 36, 1);
     renderer.end_render_pass();
+
+    renderer.submit();
 
     ++frame_number;
 

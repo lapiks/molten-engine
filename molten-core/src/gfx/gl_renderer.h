@@ -13,6 +13,7 @@ namespace gfx {
   constexpr uint32_t MAX_RENDER_PASSES = 32;
   constexpr uint32_t MAX_PIPELINES = 4096;
   constexpr uint8_t MAX_UNIFORMS = 16;
+  constexpr uint8_t MAX_SHADER_TEXTURES = 16;
 
   struct GLBuffer {
     void create(const BufferDesc& desc);
@@ -25,6 +26,7 @@ namespace gfx {
     void create(const TextureDesc& desc);
     void destroy();
 
+    GLenum target;
     GLuint id;
   };
 
@@ -59,8 +61,9 @@ namespace gfx {
   };
 
   struct GLFramebufferAttachments {
-    std::vector<GLuint> color_atts;
-    GLuint depth_att;
+    std::vector<GLuint> color_texture_ids;
+    std::vector<GLenum> color_atts;
+    std::optional<GLuint> depth_att;
   };
 
   struct GLRenderPass {
@@ -92,6 +95,7 @@ namespace gfx {
     void draw(uint32_t first_element, uint32_t num_elements, uint32_t num_instances);
     void set_viewport(const Rect& rect);
     void set_scissor(const Rect& rect);
+    void submit();
 
     bool new_buffer(Buffer h, const BufferDesc& desc);
     bool new_texture(Texture h, const TextureDesc& desc);
@@ -109,8 +113,12 @@ namespace gfx {
     // Current GL state
     struct GLState {
       GLPipeline* current_pip;
+      std::array<GLTexture*, MAX_SHADER_TEXTURES> textures;
+      GLBuffer* vertex_buffer;
+      GLBuffer* index_buffer;
       GLuint global_vao;
       GLuint default_framebuffer;
+      CullMode cull_mode;
     };
 
     GLState _state;

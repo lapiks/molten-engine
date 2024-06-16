@@ -3,7 +3,7 @@ find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{
 
 add_subdirectory(src/gfx)
 
-add_library(MoltenCore "src/engine.cpp" "src/image.cpp" "include/image.h")
+add_library(MoltenCore "src/engine.cpp" "src/image.cpp" "include/image.h" "src/shader.cpp" "include/shader.h")
 
 target_link_libraries(MoltenCore PUBLIC MoltenGfx stb_image glm fastgltf)
 
