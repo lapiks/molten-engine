@@ -10,7 +10,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "renderer.h"
+#include "gfx/renderer.h"
 #include "image.h"
 #include "engine.h"
 

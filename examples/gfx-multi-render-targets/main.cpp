@@ -10,7 +10,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "renderer.h"
+#include "gfx/renderer.h"
 #include "image.h"
 #include "shader.h"
 #include "engine.h"
@@ -266,10 +266,17 @@ int main(int, char**) {
     target_desc
   );
 
+  gfx::RenderPass gbuffer_pass = renderer.new_render_pass(
+    gfx::RenderPassDesc{
+      .colors = { pos_target, normal_target, color_target },
+      .depth = depth_target,
+    }
+  );
+
   gfx::Bindings cube_bind{
-    .vertex_buffer = cube_vbuffer,
-    .index_buffer = cube_ibuffer,
-    .textures = { gfx_face },
+  .vertex_buffer = cube_vbuffer,
+  .index_buffer = cube_ibuffer,
+  .textures = { gfx_face },
   };
 
   gfx::Bindings quad_bind{
@@ -277,15 +284,7 @@ int main(int, char**) {
     .textures = { normal_target },
   };
 
-  gfx::RenderPass gbuffer_pass = renderer.new_render_pass(
-    gfx::RenderPassDesc{
-      .colors = { pos_target, normal_target, color_target },
-      .depth = depth_target,
-    }
-    );
-
   glm::vec2 rotation = glm::vec2(0);
-  uint32_t frame_number = 0;
 
   bool should_close = false;
   bool stop_rendering = false;
@@ -366,8 +365,6 @@ int main(int, char**) {
     renderer.end_render_pass();
 
     renderer.submit();
-
-    ++frame_number;
 
 #ifdef USE_OPENGL
     SDL_GL_SwapWindow(window);

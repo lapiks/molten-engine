@@ -1,6 +1,8 @@
+#pragma once
+
 #include <glad/glad.h>
 
-#include "renderer.h"
+#include "gfx/renderer.h"
 
 namespace gfx {
   GLenum get_gl_texture_target(TextureType type) {

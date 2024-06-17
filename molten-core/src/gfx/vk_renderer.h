@@ -1,4 +1,6 @@
-#include "renderer.h"
+#pragma once
+
+#include "gfx/renderer.h"
 #include <vulkan/vulkan.h>
 #include "vk_mem_alloc.h"
 

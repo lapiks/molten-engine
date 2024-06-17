@@ -1,4 +1,4 @@
-add_library(MoltenGfx "gl_renderer.cpp" "gl_renderer.h" "vk_renderer.cpp" "vk_renderer.h" "vk_utils.h" "gl_utils.h" "renderer.cpp" "../../include/renderer.h"  "vk_utils.cpp")
+add_library(MoltenGfx "gl_renderer.cpp" "gl_renderer.h" "vk_renderer.cpp" "vk_renderer.h" "vk_utils.h" "gl_utils.h" "renderer.cpp" "../../include/gfx/renderer.h"  "vk_utils.cpp" "../gpu_resources.h")
 
 find_package(Vulkan REQUIRED FATAL_ERROR)
 find_program(GLSL_VALIDATOR glslangValidator HINTS /usr/bin /usr/local/bin $ENV{VULKAN_SDK}/Bin/ $ENV{VULKAN_SDK}/Bin32/)
