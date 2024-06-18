@@ -327,7 +327,7 @@ namespace gfx {
 
     for (int i = 0; i < MAX_SHADER_TEXTURES; ++i) {
       CachedTexture& cached_tex = _state.textures[i];
-      _state.bind_texture(i, 0, 0);
+      _state.bind_texture(i, cached_tex.target, 0);
     }
   }
 
