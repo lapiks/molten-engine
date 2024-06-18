@@ -326,11 +326,8 @@ namespace gfx {
     _state.bind_buffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     for (int i = 0; i < MAX_SHADER_TEXTURES; ++i) {
-      GLTexture* tex = _state.textures[i];
-      if (tex) {
-        glBindTexture(tex->target, 0);
-        tex = nullptr;
-      }
+      CachedTexture& cached_tex = _state.textures[i];
+      _state.bind_texture(i, cached_tex.target, cached_tex.id);
     }
   }
 
@@ -424,6 +421,12 @@ namespace gfx {
         }
       }
       break;
+    }
+  }
+  void GLRenderer::GLState::bind_texture(uint8_t slot, GLenum target, GLuint tex_id) {
+    if (target != textures[slot].target || tex_id != textures[slot].id) {
+      glBindTexture(target, tex_id);
+      textures[slot] = CachedTexture{ target, tex_id };
     }
   }
 }

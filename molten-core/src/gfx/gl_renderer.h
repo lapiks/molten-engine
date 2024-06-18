@@ -110,10 +110,15 @@ namespace gfx {
     std::array<GLRenderPass, MAX_RENDER_PASSES> _render_passes;
     std::array<GLPipeline, MAX_PIPELINES> _pipelines;
 
+    struct CachedTexture {
+      GLenum target;
+      GLuint id;
+    };
+
     // Current GL state
     struct GLState {
       GLPipeline* current_pip;
-      std::array<GLTexture*, MAX_SHADER_TEXTURES> textures;
+      std::array<CachedTexture, MAX_SHADER_TEXTURES> textures;
       GLuint vertex_buffer;
       GLuint index_buffer;
       GLuint global_vao;
@@ -121,6 +126,7 @@ namespace gfx {
       CullMode cull_mode;
 
       void bind_buffer(GLenum target, GLuint buffer_id);
+      void bind_texture(uint8_t slot, GLenum target, GLuint tex_id);
     };
 
     GLState _state;
