@@ -2,25 +2,28 @@
 A work in progress C++ voxel engine.
 
 ## Goals
+- Voxel rendering with ray-tracing
+- Each voxel model can have its own orientation
+- Gameplay scripting using an ECS
 - OpenGL support
 - Vulkan support with raytracing
-- Editor
-- Code hot-reload
-- Customizable render pipeline
+- Editor to edit scenes
+- Gameplay code hot-reload
 
 ## Build
 This project uses CMake as build system.
+To build:
 ```
 cmake . -B build
 cmake --build build 
 ```
 
 ## Dependencies
-- SDL2 for windowing, input, sound...
+- SDL2 for windowing, input, sound
+- Flecs for ECS
 - stb_image for loading images
 - GLM for linear algebra
 - GLAD for loading OpenGL functions
 - vk-bootstrap for simplifying the Vulkan initialization
-- VulkanMemoryAllocator for gpu memory allocators
-- fastgltf for gltf files loading
+- VulkanMemoryAllocator for vulkan gpu memory allocators
 - ImGui for user interface
