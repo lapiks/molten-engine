@@ -43,6 +43,7 @@ namespace gfx {
 
   GLenum get_gl_primitive_type(PrimitiveType type) {
     switch (type) {
+    case PrimitiveType::POINTS: return GL_POINTS;
     case PrimitiveType::LINES: return GL_LINES;
     case PrimitiveType::TRIANGLES: return GL_TRIANGLES;
     case PrimitiveType::TRIANGLE_STRIP: return GL_TRIANGLE_STRIP;

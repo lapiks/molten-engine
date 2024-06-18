@@ -114,11 +114,13 @@ namespace gfx {
     struct GLState {
       GLPipeline* current_pip;
       std::array<GLTexture*, MAX_SHADER_TEXTURES> textures;
-      GLBuffer* vertex_buffer;
-      GLBuffer* index_buffer;
+      GLuint vertex_buffer;
+      GLuint index_buffer;
       GLuint global_vao;
       GLuint default_framebuffer;
       CullMode cull_mode;
+
+      void bind_buffer(GLenum target, GLuint buffer_id);
     };
 
     GLState _state;

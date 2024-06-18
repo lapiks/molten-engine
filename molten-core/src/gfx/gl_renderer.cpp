@@ -235,13 +235,11 @@ namespace gfx {
 
     if (bind.index_buffer.has_value()) {
       GLBuffer& index_buffer = _buffers[bind.index_buffer.value()];
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer.id);
-      _state.index_buffer = &index_buffer;
+      _state.bind_buffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer.id);
     }
     
     GLBuffer& vertex_buffer = _buffers[bind.vertex_buffer];
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer.id);
-    _state.vertex_buffer = &vertex_buffer;
+    _state.bind_buffer(GL_ARRAY_BUFFER, vertex_buffer.id);
     for (int i = 0; i < MAX_ATTRIBUTES; i++) {
       const GLVertexAttribute& attr = pip->attributes[i];
       glVertexAttribPointer(i, attr.size, attr.type, GL_FALSE, (GLsizei)attr.stride, (const GLvoid*)attr.offset);
@@ -324,14 +322,9 @@ namespace gfx {
   }
 
   void GLRenderer::submit() {
-    if (_state.vertex_buffer) {
-      glBindBuffer(GL_VERTEX_ARRAY, 0);
-      _state.vertex_buffer = nullptr;
-    }
-    if (_state.index_buffer) {
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-      _state.index_buffer = nullptr;
-    }
+    _state.bind_buffer(GL_ARRAY_BUFFER, 0);
+    _state.bind_buffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
     for (int i = 0; i < MAX_SHADER_TEXTURES; ++i) {
       GLTexture* tex = _state.textures[i];
       if (tex) {
@@ -414,6 +407,24 @@ namespace gfx {
     }
 
     return true;
+  }
+  void GLRenderer::GLState::bind_buffer(GLenum target, GLuint buffer_id) {
+    switch (target) {
+      case GL_ARRAY_BUFFER: {
+        if (buffer_id != vertex_buffer) {
+          glBindBuffer(GL_ARRAY_BUFFER, buffer_id);
+          vertex_buffer = buffer_id;
+        }
+      } 
+      break;
+      case GL_ELEMENT_ARRAY_BUFFER: {
+        if (buffer_id != index_buffer) {
+          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id);
+          index_buffer = buffer_id;
+        }
+      }
+      break;
+    }
   }
 }
 

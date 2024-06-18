@@ -42,6 +42,7 @@ namespace gfx {
   };
 
   enum class PrimitiveType {
+    POINTS,
     LINES,
     TRIANGLES,
     TRIANGLE_FAN,
