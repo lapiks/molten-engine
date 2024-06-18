@@ -3,6 +3,12 @@
 #include "gfx/renderer.h"
 #include "gpu_resources.h"
 
+// todo: remove
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 namespace core {
   class DeferredVoxelRenderer {
   public:
@@ -24,5 +30,8 @@ namespace core {
 
     gfx::Bindings _cube_bind;
     gfx::Bindings _quad_bind;
+
+    // todo: remove
+    glm::vec2 rotation;
   };
 }

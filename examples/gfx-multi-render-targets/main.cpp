@@ -223,7 +223,7 @@ int main(int, char**) {
       .shader = screen_quad_shader,
       .layout = quad_layout,
       .index_type = gfx::IndexType::NONE,
-      .primitibe_type = gfx::PrimitiveType::TRIANGLE_STRIP,
+      .primitive_type = gfx::PrimitiveType::TRIANGLE_STRIP,
       .cull = gfx::CullMode::BACK,
     }
     );

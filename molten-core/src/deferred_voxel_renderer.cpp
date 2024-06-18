@@ -78,12 +78,16 @@ namespace core {
 
       gfx::VertexLayout layout;
       layout.attributes[0].format = gfx::AttributeFormat::FLOAT3;
+      layout.attributes[1].format = gfx::AttributeFormat::FLOAT4;
+      layout.attributes[2].format = gfx::AttributeFormat::FLOAT2;
+      layout.attributes[3].format = gfx::AttributeFormat::FLOAT3;
 
       gfx::Pipeline pip = renderer.new_pipeline(
         gfx::PipelineDesc{
           .shader = shader,
           .layout = layout,
           .index_type = gfx::IndexType::UINT16,
+          .primitive_type = gfx::PrimitiveType::TRIANGLE_STRIP,
           .cull = gfx::CullMode::BACK,
         }
       );
@@ -116,7 +120,8 @@ namespace core {
         gfx::PipelineDesc{
           .shader = shader,
           .layout = layout,
-          .index_type = gfx::IndexType::UINT16,
+          .index_type = gfx::IndexType::NONE,
+          .primitive_type = gfx::PrimitiveType::TRIANGLE_STRIP,
           .cull = gfx::CullMode::BACK,
         }
         );
@@ -145,8 +150,10 @@ namespace core {
       );
 
       return GPUMesh{
-        vbuffer,
-        ibuffer,
+        .vbuffer = vbuffer,
+        .ibuffer = ibuffer,
+        .vertex_count = sizeof(shapes::cube::VERTICES),
+        .index_count = sizeof(shapes::cube::INDICES),
       };
     }
   };
@@ -163,6 +170,8 @@ namespace core {
       return GPUMesh{
         .vbuffer = vbuffer,
         .ibuffer = std::nullopt,
+        .vertex_count = sizeof(shapes::quad::VERTICES),
+        .index_count = 0,
       };
     }
   };
@@ -175,7 +184,7 @@ namespace core {
     _screen_quad_pip = ScreenQuadPipeline::create(_renderer);
 
     // create render pass
-    _gbuffer_pass = GBufferPass::create(_renderer, 800, 600);
+    _gbuffer_pass = GBufferPass::create(_renderer, 1024, 680);
 
     // create meshes
     _cube = Cube::create(_renderer);
@@ -189,13 +198,15 @@ namespace core {
 
     _quad_bind = {
       .vertex_buffer = _quad.vbuffer,
-      .textures = { _gbuffer_pass.targets[1] },
+      .textures = { _gbuffer_pass.targets[0] },
     };
   }
 
   void DeferredVoxelRenderer::render() {
-    glm::mat4 model(1.0f);
-    glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)800.0f / 600.0f, 0.01f, 10.0f);
+    rotation.x += 0.01f;
+    rotation.y += 0.03f;
+    glm::mat4 model = glm::eulerAngleY(rotation.y) * glm::eulerAngleX(rotation.x);
+    glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)1024.0f / 680.0f, 0.01f, 10.0f);
     glm::mat4 view = glm::lookAt(
       glm::vec3(0.0f, 1.5f, 3.0f),
       glm::vec3(0.0f, 0.0f, 0.0f),
@@ -219,7 +230,7 @@ namespace core {
     _renderer.set_pipeline(_gbuffer_pip.pipeline);
     _renderer.set_bindings(_cube_bind);
     _renderer.set_uniforms(gfx::MAKE_MEMORY(uniforms));
-    _renderer.draw(0, 36, 1);
+    _renderer.draw(0, 14, 1);
     _renderer.end_render_pass();
 
     _renderer.begin_default_render_pass(

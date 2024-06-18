@@ -395,7 +395,7 @@ namespace gfx {
     pipe.shader = &_shaders[desc.shader];
     pipe.index_type = get_gl_index_type(desc.index_type);
     pipe.cull_mode = get_gl_cull_mode(desc.cull);
-    pipe.primitive_type = get_gl_primitive_type(desc.primitibe_type);
+    pipe.primitive_type = get_gl_primitive_type(desc.primitive_type);
 
     size_t offset = 0;
     for (int i = 0; i < MAX_ATTRIBUTES; i++) {
