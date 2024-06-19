@@ -14,9 +14,9 @@ add_library(MoltenCore
   "include/image.h" 
   "include/shader.h"    
   "include/transform_3d.h" 
-)
+ "src/vox_scene.h" "src/vox_scene.cpp" "src/asset_manager.h" "src/asset_manager.cpp" "src/pool.h" "src/pool.cpp")
 
-target_link_libraries(MoltenCore PUBLIC MoltenGfx stb_image glm fastgltf)
+target_link_libraries(MoltenCore PUBLIC MoltenGfx stb_image glm ogt_vox)
 
 target_include_directories(MoltenCore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 

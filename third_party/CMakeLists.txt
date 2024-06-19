@@ -4,6 +4,7 @@ add_library(vkbootstrap STATIC)
 add_library(glm INTERFACE)
 add_library(vma INTERFACE)
 add_library(stb_image INTERFACE)
+add_library(ogt_vox INTERFACE)
 
 add_subdirectory(glad)
 add_subdirectory(fastgltf-0.7.1)
@@ -21,6 +22,7 @@ target_link_libraries(vkbootstrap PUBLIC Vulkan::Vulkan $<$<BOOL:UNIX>:${CMAKE_D
 target_include_directories(vma INTERFACE VulkanMemoryAllocator-3.1.0)
 target_include_directories(stb_image INTERFACE stb_image)
 target_include_directories(glm INTERFACE glm-1.0)
+target_include_directories(ogt_vox INTERFACE opengametools/src)
 
 add_library(imgui STATIC)
 
