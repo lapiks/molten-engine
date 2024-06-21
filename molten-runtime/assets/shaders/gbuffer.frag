@@ -1,7 +1,6 @@
 #version 330 core
 
 const int MAX_RAY_STEPS = 64;
-const float MODEL_DIM = 21; 
 
 layout (location = 0) out vec3 o_pos;
 layout (location = 1) out vec3 o_normal;
@@ -15,6 +14,7 @@ in vec3 io_ray_dir;
 
 uniform sampler3D u_vox_model;
 uniform mat4 u_view;
+uniform vec3 u_model_dim;
 
 struct Ray {
   vec3 pos;
@@ -71,7 +71,7 @@ bool ray_box_intersection(Ray ray, Box box, inout float t_min, inout float t_max
 }
 
 vec3 to_tex_coord(ivec3 voxel_coord) {
-  return (voxel_coord * 2 + 1) / (2 * MODEL_DIM);
+  return (voxel_coord * 2 + 1) / (2 * u_model_dim);
 }
 
 void main() {
@@ -82,7 +82,7 @@ void main() {
 
   Box box = Box(
     vec3(0.),
-    vec3(MODEL_DIM)
+    u_model_dim
   );
 
   float t_min_box = 0.;
@@ -99,9 +99,11 @@ void main() {
 
 	bvec3 mask = bvec3(0);
 	
+  vec4 voxel_color = vec4(0.0);
   bool hit = false;
 	for (int i = 0; i < MAX_RAY_STEPS; i++) {
-		if (texture(u_vox_model, to_tex_coord(map_pos)).r > 0.) {
+    voxel_color = texture(u_vox_model, to_tex_coord(map_pos));
+		if (voxel_color.r > 0.) {
       hit = true; 
       break;
     }
@@ -112,12 +114,12 @@ void main() {
 		map_pos += ivec3(vec3(mask)) * ray_step;
 	}
 
-  o_pos = io_pos;
   o_normal = normalize(io_normal);
+  o_pos = to_tex_coord(map_pos);
 
-  //o_color = vec4(to_tex_coord(map_pos), 1.0);
-  if (hit)
-    o_color = vec4(vec3(mask) * vec3(1.), 1.);
+  if (hit) {  
+    o_color = voxel_color * 100;
+  }
   else
     discard;
 }

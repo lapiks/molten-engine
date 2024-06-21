@@ -34,5 +34,6 @@ namespace core {
     // todo: remove
     glm::vec2 rotation;
     gfx::Texture vox_texture;
+    glm::vec3 model_dim;
   };
 }

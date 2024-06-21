@@ -55,6 +55,7 @@ namespace core {
       glm::mat4 model;
       glm::mat4 view;
       glm::mat4 proj;
+      glm::vec3 model_dim;
     };
 
     static GPUPipeline create(gfx::Renderer& renderer) {
@@ -77,7 +78,11 @@ namespace core {
             gfx::UniformDesc {
               .name = "u_proj",
               .type = gfx::UniformType::MAT4,
-            }
+            },
+            gfx::UniformDesc {
+              .name = "u_model_dim",
+              .type = gfx::UniformType::FLOAT3,
+            },
           },
         },
         .texture_names = { "u_vox_model" },
@@ -201,8 +206,13 @@ namespace core {
 
     // todo: remove
     VoxScene vox_scene;
-    vox_scene.load("assets/models/castle.vox");
+    vox_scene.load("assets/models/chr_knight.vox");
     const ogt_vox_model* model = vox_scene.ogt_scene->models[0];
+    model_dim = {
+      model->size_x,
+      model->size_y,
+      model->size_z,
+    };
 
     vox_texture = _renderer.new_texture(
       gfx::TextureDesc{
@@ -230,7 +240,7 @@ namespace core {
 
   void DeferredVoxelRenderer::render() {
     rotation.x += 0.01f;
-    //rotation.y += 0.03f;
+    rotation.y += 0.03f;
     glm::mat4 model = glm::eulerAngleY(rotation.y) * glm::eulerAngleX(rotation.x);
     //glm::mat4 model = glm::mat4(1.0);
     glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)1024.0f / 680.0f, 0.01f, 10.0f);
@@ -244,6 +254,7 @@ namespace core {
       .model = model,
       .view = view,
       .proj = proj,
+      .model_dim = model_dim
     };
 
     _renderer.begin_render_pass(
