@@ -4,7 +4,7 @@ const int MAX_RAY_STEPS = 64;
 
 layout (location = 0) out vec3 o_pos;
 layout (location = 1) out vec3 o_normal;
-layout (location = 2) out vec4 o_color;
+layout (location = 2) out vec3 o_color;
 
 in vec2 io_uv;
 in vec3 io_pos;
@@ -13,6 +13,7 @@ in vec3 io_ray_pos;
 in vec3 io_ray_dir;
 
 uniform sampler3D u_vox_model;
+uniform mat4 u_model;
 uniform mat4 u_view;
 uniform vec3 u_model_dim;
 
@@ -114,11 +115,10 @@ void main() {
 		map_pos += ivec3(vec3(mask)) * ray_step;
 	}
 
-  o_normal = normalize(io_normal);
-  o_pos = to_tex_coord(map_pos);
-
   if (hit) {  
-    o_color = voxel_color * 100;
+    o_normal = vec3(u_model * vec4(vec3(mask), 1.0));
+    o_pos = vec3(u_model * vec4(to_tex_coord(map_pos), 1.0));
+    o_color = voxel_color.rgb * 100;
   }
   else
     discard;

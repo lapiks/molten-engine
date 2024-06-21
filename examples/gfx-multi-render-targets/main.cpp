@@ -281,7 +281,7 @@ int main(int, char**) {
 
   gfx::Bindings quad_bind{
     .vertex_buffer = quad_vbuffer,
-    .textures = { normal_target },
+    .textures = { pos_target },
   };
 
   glm::vec2 rotation = glm::vec2(0);

@@ -234,7 +234,7 @@ namespace core {
 
     _quad_bind = {
       .vertex_buffer = _quad.vbuffer,
-      .textures = { _gbuffer_pass.targets[2] },
+      .textures = { _gbuffer_pass.targets[1] },
     };
   }
 
@@ -245,7 +245,7 @@ namespace core {
     //glm::mat4 model = glm::mat4(1.0);
     glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)1024.0f / 680.0f, 0.01f, 10.0f);
     glm::mat4 view = glm::lookAt(
-      glm::vec3(0.0f, 0.0f, 2.0f),
+      glm::vec3(0.0f, 0.0f, 1.5f),
       glm::vec3(0.0f, 0.0f, 0.0f),
       glm::vec3(0.0f, 1.0f, 0.0f)
     );
