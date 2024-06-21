@@ -33,10 +33,11 @@ namespace gfx {
     glBindTexture(target, id);
 
     // todo: config this
-    glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(target, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     switch (desc.type) {
       using enum TextureType;
@@ -56,6 +57,8 @@ namespace gfx {
     
     if(desc.generate_mip_maps)
       glGenerateMipmap(target);
+
+    glBindTexture(target, 0);
   }
 
   void GLTexture::destroy() {
@@ -179,6 +182,12 @@ namespace gfx {
 
     // init renderer state
     glEnable(GL_DEPTH_TEST);
+
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
 
   void GLRenderer::shutdown() {
@@ -255,7 +264,7 @@ namespace gfx {
     for (Texture tex : bind.textures) {
       const GLTexture& gl_texture = _textures[tex];
       glActiveTexture(GL_TEXTURE0 + texture_idx);
-      glBindTexture(GL_TEXTURE_2D, gl_texture.id);
+      glBindTexture(gl_texture.target, gl_texture.id);
       glUniform1i(shader->shader_textures[texture_idx].uniform_loc, texture_idx);
       ++texture_idx;
     }

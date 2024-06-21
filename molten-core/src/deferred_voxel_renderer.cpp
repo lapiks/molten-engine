@@ -4,6 +4,10 @@
 #include "shapes.h"
 #include "shader.h"
 
+// todo remove
+#include "vox_scene.h"
+#include "ogt_vox.h"
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -49,7 +53,8 @@ namespace core {
   struct GBufferPipeline {
     struct Uniforms {
       glm::mat4 model;
-      glm::mat4 view_proj;
+      glm::mat4 view;
+      glm::mat4 proj;
     };
 
     static GPUPipeline create(gfx::Renderer& renderer) {
@@ -66,12 +71,16 @@ namespace core {
               .type = gfx::UniformType::MAT4,
             },
             gfx::UniformDesc {
-              .name = "u_view_proj",
+              .name = "u_view",
+              .type = gfx::UniformType::MAT4,
+            },
+            gfx::UniformDesc {
+              .name = "u_proj",
               .type = gfx::UniformType::MAT4,
             }
           },
         },
-        .texture_names = { "u_tex" },
+        .texture_names = { "u_vox_model" },
       };
 
       gfx::Shader shader = renderer.new_shader(desc);
@@ -190,32 +199,51 @@ namespace core {
     _cube = Cube::create(_renderer);
     _quad = Quad::create(_renderer);
 
+    // todo: remove
+    VoxScene vox_scene;
+    vox_scene.load("assets/models/castle.vox");
+    const ogt_vox_model* model = vox_scene.ogt_scene->models[0];
+
+    vox_texture = _renderer.new_texture(
+      gfx::TextureDesc{
+        .mem = (uint8_t*)model->voxel_data,
+        .type = gfx::TextureType::TEXTURE_3D,
+        .format = gfx::TextureFormat::R8,
+        .width = model->size_x,
+        .height = model->size_y,
+        .depth = model->size_z,
+      }
+    );
+
     // bindings
     _cube_bind = {
       .vertex_buffer = _cube.vbuffer,
       .index_buffer = _cube.ibuffer,
+      .textures = { vox_texture },
     };
 
     _quad_bind = {
       .vertex_buffer = _quad.vbuffer,
-      .textures = { _gbuffer_pass.targets[0] },
+      .textures = { _gbuffer_pass.targets[2] },
     };
   }
 
   void DeferredVoxelRenderer::render() {
     rotation.x += 0.01f;
-    rotation.y += 0.03f;
+    //rotation.y += 0.03f;
     glm::mat4 model = glm::eulerAngleY(rotation.y) * glm::eulerAngleX(rotation.x);
+    //glm::mat4 model = glm::mat4(1.0);
     glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)1024.0f / 680.0f, 0.01f, 10.0f);
     glm::mat4 view = glm::lookAt(
-      glm::vec3(0.0f, 1.5f, 3.0f),
+      glm::vec3(0.0f, 0.0f, 2.0f),
       glm::vec3(0.0f, 0.0f, 0.0f),
       glm::vec3(0.0f, 1.0f, 0.0f)
     );
 
     GBufferPipeline::Uniforms uniforms{
       .model = model,
-      .view_proj = proj * view,
+      .view = view,
+      .proj = proj,
     };
 
     _renderer.begin_render_pass(

@@ -36,6 +36,7 @@ namespace gfx {
   };
 
   enum class TextureFormat {
+    R8,
     RGB8,
     RGBA8,
     DEPTH,
